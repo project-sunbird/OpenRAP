@@ -89,6 +89,12 @@ export class DownloadManagerHelper {
                             if (file.id === downloadId) {
                                 file.downloaded = downloaded
                                 file.size = progressInfo.total.filesize;
+                                doc.stats.downloadedSize = progressInfo.total.downloaded;
+                                this.dbSDK.updateDoc(this.dataBaseName, docId, {
+                                    files: doc.files,
+                                    stats: doc.stats,
+                                    updatedOn: Date.now();
+                                });
                             }
                             return file;
                         })
