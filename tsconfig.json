@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "module": "commonjs",
+    "outDir": "./dist",
+    "target": "es6"
+  },
+  "exclude": ["node_modules", "*/**/*.spec.ts", "*.spec.ts", "dist"]
+}
