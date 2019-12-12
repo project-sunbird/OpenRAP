@@ -10,5 +10,5 @@ export interface IFramework {
     board: string;
     medium: Array<string>;
     gradeLevel: Array<string>;
-    subject: Array<string>;
+    subject?: Array<string>;
 }
