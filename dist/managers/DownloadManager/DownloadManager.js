@@ -286,7 +286,9 @@ class DownloadManager {
             let pausedInQueue = false;
             if (_.isEmpty(doc)) {
                 throw {
-                    code: "DOC_NOT_FOUND"
+                    code: "DOC_NOT_FOUND",
+                    status: 400,
+                    message: `Download Document not found with id ${downloadId}`
                 };
             }
             for (let file of doc.files) {
@@ -307,7 +309,9 @@ class DownloadManager {
             }
             else {
                 throw {
-                    code: "NO_FILES_IN_QUEUE"
+                    code: "NO_FILES_IN_QUEUE",
+                    status: 400,
+                    message: `No files are in queue for id ${downloadId}`
                 };
             }
         });
@@ -326,7 +330,7 @@ class DownloadManager {
             if (_.isEmpty(doc)) {
                 throw {
                     code: "DOC_NOT_FOUND",
-                    status: "400",
+                    status: 400,
                     message: `Download Document not found with id ${downloadId}`
                 };
             }
@@ -354,7 +358,7 @@ class DownloadManager {
             else {
                 throw {
                     code: "NO_FILES_IN_QUEUE",
-                    status: "400",
+                    status: 400,
                     message: `No files are in queue for id ${downloadId}`
                 };
             }
@@ -373,14 +377,14 @@ class DownloadManager {
             if (_.isEmpty(doc)) {
                 throw {
                     code: "DOC_NOT_FOUND",
-                    status: "400",
+                    status: 400,
                     message: `Download Document not found with id ${downloadId}`
                 };
             }
             if (doc.status !== STATUS.Failed) {
                 throw {
                     code: "INVALID_OPERATION",
-                    status: "400",
+                    status: 400,
                     message: `Only canceled items can be retried`
                 };
             }
