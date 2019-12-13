@@ -294,7 +294,7 @@ class DownloadManager {
             for (let file of doc.files) {
                 if (file.size > file.downloaded) {
                     let key = `${doc._id}_${file.id}`;
-                    const pauseRes = this.downloadManagerHelper.pause(key);
+                    const pauseRes = this.downloadManagerHelper.cancel(key);
                     if (pauseRes) {
                         pausedInQueue = true;
                     }
