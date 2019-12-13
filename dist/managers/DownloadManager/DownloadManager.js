@@ -347,7 +347,7 @@ class DownloadManager {
                     deleteItems.push(path.join(file.path, file.file));
                 }
             }
-            if (canceledInQueue) {
+            if (canceledInQueue || doc.status === STATUS.Paused) {
                 yield this.dbSDK.updateDoc(this.dataBaseName, doc._id, {
                     updatedOn: Date.now(),
                     status: STATUS.Canceled
@@ -385,7 +385,7 @@ class DownloadManager {
                 throw {
                     code: "INVALID_OPERATION",
                     status: 400,
-                    message: `Only canceled items can be retried`
+                    message: `Only failed items can be retried`
                 };
             }
             yield this.resume(doc._id);
@@ -405,33 +405,38 @@ class DownloadManager {
                 logger_1.logger.error(`while getting the doc to resume doc_id ${downloadId}, err: ${err}`);
             });
             let addedToQueue = false;
-            if (!_.isEmpty(doc)) {
-                for (let file of doc.files) {
-                    if (file.size > file.downloaded) {
-                        // push the request to download queue
-                        let locations = {
-                            url: file.source,
-                            savePath: path.join(file.path, file.file)
-                        };
-                        // while adding to queue we will prefix with docId if same content is requested again we will download it again
-                        try {
-                            let downloadQueue = this.downloadQueue();
-                            let key = `${doc._id}_${file.id}`;
-                            if (!_.find(downloadQueue, { key: key })) {
-                                addedToQueue = true;
-                                this.downloadManagerHelper.queueDownload(key, doc.pluginId, locations, this.downloadManagerHelper.downloadObserver(file.id, doc._id));
-                            }
-                        }
-                        catch (error) {
-                            logger_1.logger.error(`while adding to queue doc ${JSON.stringify(doc)}, error : ${error}`);
+            if (_.isEmpty(doc)) {
+                throw {
+                    code: "DOC_NOT_FOUND",
+                    status: 400,
+                    message: `Download Document not found with id ${downloadId}`
+                };
+            }
+            for (let file of doc.files) {
+                if (file.size > file.downloaded) {
+                    // push the request to download queue
+                    let locations = {
+                        url: file.source,
+                        savePath: path.join(file.path, file.file)
+                    };
+                    // while adding to queue we will prefix with docId if same content is requested again we will download it again
+                    try {
+                        let downloadQueue = this.downloadQueue();
+                        let key = `${doc._id}_${file.id}`;
+                        if (!_.find(downloadQueue, { key: key })) {
+                            addedToQueue = true;
+                            this.downloadManagerHelper.queueDownload(key, doc.pluginId, locations, this.downloadManagerHelper.downloadObserver(file.id, doc._id));
                         }
                     }
+                    catch (error) {
+                        logger_1.logger.error(`while adding to queue doc ${JSON.stringify(doc)}, error : ${error}`);
+                    }
                 }
-                if (addedToQueue) {
-                    yield this.dbSDK.updateDoc(this.dataBaseName, doc._id, {
-                        updatedOn: Date.now()
-                    });
-                }
+            }
+            if (addedToQueue) {
+                yield this.dbSDK.updateDoc(this.dataBaseName, doc._id, {
+                    updatedOn: Date.now()
+                });
             }
         });
     }
