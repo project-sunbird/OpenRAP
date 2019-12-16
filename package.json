@@ -1,9 +1,10 @@
 {
   "name": "OpenRAP",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "OpenRAP Software",
   "main": "dist/main.js",
   "scripts": {
+    "dev-build": "npm run build && gulp copy-dist-to-app",
     "build": "rimraf dist && tsc && cpy package.json ./dist && cpy  ./db/ ./dist/db/",
     "test": "nyc --reporter=lcov --reporter=html --reporter=text mocha --exit -r ts-node/register **/**/*.spec.ts **/*.spec.ts *.spec.ts"
   },
