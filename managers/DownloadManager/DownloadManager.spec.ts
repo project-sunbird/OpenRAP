@@ -14,7 +14,7 @@ const spy = chai.spy.sandbox();
 const expect = chai.expect;
 import * as path from "path";
 
-describe.only("DownloadManager", () => {
+describe("DownloadManager", () => {
   before( async() => {
     await fileSDK.mkdir("database");
     downloadManager = new DownloadManager("testplugindownload");
