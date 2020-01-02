@@ -14,13 +14,14 @@ import SystemSDK from "./../sdks/SystemSDK";
 import TelemetrySDK from "./../sdks/TelemetrySDK";
 import { UserSDK } from "./../sdks/UserSDK";
 import { TicketSDK } from "./../sdks/TicketSDK";
+import { SystemQueue } from "./../services/queue";
 
 @Singleton
 class ContainerAPI {
 
   @Inject userSDK : UserSDK;
   @Inject ticketSDK : TicketSDK;
-
+  @Inject systemQueue: SystemQueue
   public async bootstrap() {
     await bootstrap();
   }
@@ -67,6 +68,13 @@ class ContainerAPI {
   }
   public getTicketSdkInstance(){
     return this.ticketSDK;
+  }
+  public getSystemQueueInstance(pluginId: string){
+    return {
+      registerTask (data) { 
+        this.systemQueue.registerTask(pluginId, ...data);
+      },
+    }
   }
 }
 
