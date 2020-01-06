@@ -43,6 +43,15 @@ export class SystemQueue {
         .catch((err) => logger.log("reconcile error while updating status to DB", err.message));
     }
     this.executeNextTask();
+    setInterval(this.trackTaskProgress, 1000)
+  }
+  /**
+   * method to track progress of task.
+   * this method will stop the task for which progress is not updated for configured time
+   * and pick next task in queue
+   */
+  trackTaskProgress(){
+    //TODO: implement progress track method
   }
   /**
    * method to register task with taskExecuters.
@@ -81,7 +90,7 @@ export class SystemQueue {
       }
     }
     tasks = _.isArray(tasks) ? tasks : [tasks]
-    const queueData = tasks.map(task => ({
+    const queueData: ISystemQueue[] = tasks.map(task => ({
       ...task,
       _id: uuid(),
       createdOn: Date.now(),
@@ -90,6 +99,7 @@ export class SystemQueue {
       progress: 0,
       plugin,
       priority: 1,
+      runTime: 0,
       isActive: true,
     }));
     await this.dbSDK.bulkDocs(this.dbName, queueData)
@@ -136,15 +146,18 @@ export class SystemQueue {
           task.status = SystemQueueStatus.inProgress;
           syncFunc.next(task);
           taskExecuterRef.start(task, observer);
-          const runningTask = {
+          const runningTaskRef = {
             _id: task._id,
             type: task.type,
             plugin: task.plugin,
             taskExecuterRef,
+            startTime: Date.now(),
+            lastKnowProgress: task.progress,
+            lastKnowProgressUpdatedTime: Date.now(),
             syncFunc,
           };
-          this.runningTasks.push(runningTask);
-          groupedRunningTask[`${task.plugin}_${task.type}`].push(runningTask)
+          this.runningTasks.push(runningTaskRef);
+          groupedRunningTask[`${task.plugin}_${task.type}`].push(runningTaskRef)
         } else if (!taskExecuter) {
           // TODO: fail all task which doesn't have task Executers
           logger.error('TaskExecuter not found for task', task.plugin, task.type);
@@ -181,6 +194,8 @@ export class SystemQueue {
   private getTaskObserver(queueCopy: ISystemQueue, syncFun: Subject<ISystemQueue>): Observer<ISystemQueue> {
     const next = (data: ISystemQueue) => {
       queueCopy = data;
+      const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
+      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
       syncFun.next(queueCopy);
     };
     const error = (err: SystemQueueError) => {
@@ -188,6 +203,8 @@ export class SystemQueue {
       queueCopy.failedCode = err.code;
       queueCopy.failedReason = err.message;
       queueCopy.isActive = false;
+      const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
+      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
       syncFun.error(queueCopy);
       _.remove(this.runningTasks, (job) => job._id === queueCopy._id);
       this.executeNextTask();
@@ -195,6 +212,8 @@ export class SystemQueue {
     const complete = () => {
       queueCopy.isActive = false;
       queueCopy.status = SystemQueueStatus.completed;
+      const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
+      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
       syncFun.next(queueCopy);
       syncFun.complete();
       _.remove(this.runningTasks, (job) => job._id === queueCopy._id);
@@ -221,6 +240,9 @@ interface IRunningTasks {
   _id: ISystemQueue['_id'];
   type: ISystemQueue['type'];
   plugin: ISystemQueue['plugin'];
+  startTime: number;
+  lastKnowProgress: number;
+  lastKnowProgressUpdatedTime: number;
   taskExecuterRef: ITaskExecuter;
   syncFunc: any;
 }

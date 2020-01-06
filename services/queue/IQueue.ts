@@ -18,6 +18,7 @@ export interface ISystemQueue extends IQueue {
   isActive: boolean;
   failedReason?: string;
   indexField: string;
+  runTime: number;
 }
 
 export interface INetworkQueue extends IQueue {
