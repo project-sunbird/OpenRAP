@@ -7,6 +7,7 @@ import { logger } from "@project-sunbird/ext-framework-server/logger";
 import uuid = require("uuid");
 import { Subject, Observer } from "rxjs";
 import { debounceTime } from "rxjs/operators";
+export { ISystemQueue } from './IQueue';
 
 @Singleton 
 export class SystemQueue {
@@ -201,17 +202,17 @@ export class SystemQueue {
     };
     return { next, error, complete };
   }
-  private async remove(plugin: string, id: string){ // not needed, should always use cancel
+  private async remove(plugin: string, _id: string){ // not needed, should always use cancel
   }
   public async query(plugin: string, query: SystemQueueQuery, sort: any){
   }
-  public async pause(plugin: string, id: string){
+  public async pause(plugin: string, _id: string){
   }
-  public async resume(plugin: string, id: string){
+  public async resume(plugin: string, _id: string){
   }
-  public async cancel(plugin: string, id: string){
+  public async cancel(plugin: string, _id: string){
   }
-  public async retry(plugin: string, id: string){
+  public async retry(plugin: string, _id: string){
   }
   //TODO: support custom actions
 }
