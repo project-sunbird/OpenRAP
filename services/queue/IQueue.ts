@@ -9,6 +9,7 @@ export interface IQueue {
 
 export interface ISystemQueue extends IQueue {
   name: string;
+  _rev?: string;
   progress: number;
   group: string;
   plugin: string;
