@@ -4,7 +4,7 @@ import { Inject } from "typescript-ioc";
 import { DataBaseSDK } from "../../sdks/DataBaseSDK";
 import { ISystemQueue } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
-import uuid = require("uuid");
+const uuid = require("uuid");
 import { Subject, Observer } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 export { ISystemQueue } from './IQueue';
@@ -20,7 +20,6 @@ export class SystemQueue {
     concurrency: 1,
     concurrencyLevel: ConcurrencyLevel.task // runs one task at a time for each type of task per plugin
   };
-  constructor() {}
   /**
    * method to initializes system queue.
    * This method should be called after all plugin and app are initialized
@@ -28,7 +27,7 @@ export class SystemQueue {
    */
   public async initialize(config: Config) {
     // this.config = config; TODO: support configurable concurrency
-    const {docs} = await this.dbSDK.find(this.dbName, { selector: { status: SystemQueueStatus.inProgress} })
+    const { docs } = await this.dbSDK.find(this.dbName, { selector: { status: SystemQueueStatus.inProgress} })
     .catch((err) => {
       logger.log("reconcile error while fetching inProgress content from DB", err.message);
       return { docs: [] };
@@ -43,14 +42,14 @@ export class SystemQueue {
         .catch((err) => logger.log("reconcile error while updating status to DB", err.message));
     }
     this.executeNextTask();
-    setInterval(this.trackTaskProgress, 1000)
+    setInterval(this.trackTaskProgress, 1000);
   }
   /**
    * method to track progress of task.
    * this method will stop the task for which progress is not updated for configured time
    * and pick next task in queue
    */
-  trackTaskProgress(){
+  private trackTaskProgress(){
     //TODO: implement progress track method
   }
   /**
