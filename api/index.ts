@@ -14,14 +14,19 @@ import SystemSDK from "./../sdks/SystemSDK";
 import TelemetrySDK from "./../sdks/TelemetrySDK";
 import { UserSDK } from "./../sdks/UserSDK";
 import { TicketSDK } from "./../sdks/TicketSDK";
-
+import { initLogger } from "./../services/logger/loggerService";
+export * from "./../services/logger/logDecorators";
+export { logger } from "./../services/logger/loggerService"
 @Singleton
 class ContainerAPI {
 
   @Inject userSDK : UserSDK;
   @Inject ticketSDK : TicketSDK;
-
+  public initLogger(config?){
+    initLogger(config);
+  }
   public async bootstrap() {
+    this.initLogger();
     await bootstrap();
   }
 
