@@ -6,7 +6,7 @@ logger.level = 'off';
 type loggerLevels = 'all' | 'trace' | 'fatal' | 'error' | 'off' | 'info' | 'warn' | 'debug'
 const defaultConfig = {
   basePath: path.join(__dirname, './../../../../../'), // default to parent root directory
-  logLevel: "debug"
+  logLevel: "all"
 }
 function initLogger(config = defaultConfig) {
   log4js.configure({
@@ -51,6 +51,6 @@ function initLogger(config = defaultConfig) {
       "http": { "appenders": ["access"], "level": "DEBUG" }
     }
   });
-  logger.level = config.logLevel;
+  logger.level = 'off' || config.logLevel;
 }
 export { logger, initLogger, loggerLevels };

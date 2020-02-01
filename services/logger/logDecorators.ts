@@ -1,22 +1,26 @@
 const MS_PER_SEC = 1000;
 import { logger } from "./loggerService";
+import * as _ from "lodash";
 
 export function logSync(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalFunction = descriptor.value;
 
   descriptor.value = function (...args: any[]) {
+    if(_.get(logger, 'level.levelStr') !== 'ALL'){
+      return originalFunction.apply(this, args);
+    }
     const startHrTime = process.hrtime();
-    logger.info(`${propertyKey} called with: ${args.join(", ")}`);
+    logger.debug(`${propertyKey} called with: ${args.join(", ")}`);
     try {
       const result = originalFunction.apply(this, args);
       const diff = process.hrtime(startHrTime);
       const endTime = diff[0] * MS_PER_SEC + diff[1];
-      logger.info(`${propertyKey} returned with: ${result}. Took ${endTime} milliseconds`);
+      logger.debug(`${propertyKey} returned with: ${result}. Took ${endTime} milliseconds`);
       return result;
     } catch(err) {
       const diff = process.hrtime(startHrTime);
       const endTime = diff[0] * MS_PER_SEC + diff[1];
-      logger.info(`${propertyKey} error-ed with message: ${err.message}. Took ${endTime} milliseconds`);
+      logger.debug(`${propertyKey} error-ed with message: ${err.message}.`);
       throw err;
     }
   }
@@ -24,21 +28,28 @@ export function logSync(target: any, propertyKey: string, descriptor: PropertyDe
 
 export function logAsync(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalFunction = descriptor.value;
-
-  descriptor.value = async function (...args: any[]) {
+  // accept log level
+  descriptor.value = function (...args: any[]) {
+    if(_.get(logger, 'level.levelStr') !== 'ALL'){
+      console.log('skipping logging');
+      return originalFunction.apply(this, args);
+    }
     const startHrTime = process.hrtime();
     let endTime;
-    logger.info(`${propertyKey} called with: ${args.join(", ")}`);
-    const result = await originalFunction.apply(this, args)
-    .catch((err) => {
-      const diff = process.hrtime(startHrTime);
-      endTime = diff[0] * MS_PER_SEC + diff[1];
-      logger.error(`${propertyKey} error-ed with message: ${err.message || err}. Took ${endTime} milliseconds`);
-      throw err;
-    });
-    const diff = process.hrtime(startHrTime);
-    endTime = diff[0] * MS_PER_SEC + diff[1];
-    logger.info(`${propertyKey} returned with: ${result}. Took ${endTime} milliseconds`);
-    return result;
+    logger.debug(`--AOP-- ${propertyKey} called with: ${args.join(", ")}`);
+    return new Promise((resolve, reject) => {
+      originalFunction.apply(this, args).then(result => {
+        const diff = process.hrtime(startHrTime);
+        endTime = diff[0] * MS_PER_SEC + diff[1];
+        logger.debug(`--AOP-- ${propertyKey} returned with: ${result}. endTime`);
+        resolve(result);
+      })
+      .catch((err) => {
+        const diff = process.hrtime(startHrTime);
+        endTime = diff[0] * MS_PER_SEC + diff[1];
+        logger.debug(`--AOP-- ${propertyKey} error-ed with message: ${err.message || err}.`);
+        reject(err);
+      });
+    })
   }
 }
