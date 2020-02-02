@@ -6,7 +6,7 @@ import { ISystemQueue } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
 const uuid = require("uuid");
 import { Subject, Observer } from "rxjs";
-import { debounceTime } from "rxjs/operators";
+import { throttleTime } from "rxjs/operators";
 export { ISystemQueue } from './IQueue';
 
 @Singleton 
@@ -124,7 +124,7 @@ export class SystemQueue {
         return;
       }
       const selector = { // TODO: should limit task query at plugin/type level
-        isActive: true,
+        status: { $in: [SystemQueueStatus.inQueue, SystemQueueStatus.resume] },
         plugin: { $in: fetchQuery.map(data => data.plugin) },
         type: { $in: fetchQuery.map(data => data.type) }
       }
@@ -178,7 +178,7 @@ export class SystemQueue {
         logger.error("Error while update doc for task", taskData._id, err.message);
       });
     }
-    syncData$.pipe(debounceTime(500))
+    syncData$.pipe(throttleTime(500))
     .subscribe((data) => {
       data._id = taskData._id;
       data._rev = taskData._rev;
@@ -262,7 +262,7 @@ export interface QueueReq {
   type: ISystemQueue['type'];
   name: ISystemQueue['name'];
   group: ISystemQueue['group']; // ex: content_manager, telemetry etc
-  additionalInfo: ISystemQueue['additionalInfo']; // any data required for 
+  data: ISystemQueue['data']; // any data required for 
   indexField: ISystemQueue['indexField']; // ex: ecar path for import, content identifier for download/delete
 }
 

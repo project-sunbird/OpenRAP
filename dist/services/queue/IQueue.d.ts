@@ -1,24 +1,17 @@
 export interface IQueue {
     _id?: string;
-    type: string,
+    type: string;
     priority: number;
     createdOn: number;
     updatedOn: number;
     data?: any;
 }
-
 export interface ISystemQueue extends IQueue {
-  name?: string;
-  _rev?: string;
-  group: string;
-  plugin: string;
-  status: string;
-  failedCode?: string;
-  isActive: boolean;
-  failedReason?: string;
-  indexField: string;
-  runTime: number;
-  progress: number;
+    size: number;
+    artifactUrl?: string;
+    fileName?: string;
+    status: string;
+    progress: number;
 }
 export interface INetworkQueue extends IQueue {
     pathToApi: string;
@@ -29,7 +22,6 @@ export interface INetworkQueue extends IQueue {
     size?: number;
     count?: number;
 }
-
 export interface IQuery {
     selector: {
         type: string;
@@ -37,7 +29,6 @@ export interface IQuery {
     };
     limit?: number;
 }
-
 export interface IUpdateQuery {
     updatedOn: number;
 }

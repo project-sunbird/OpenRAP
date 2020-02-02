@@ -3,7 +3,7 @@
  */
 
 import { Singleton, Inject } from "typescript-ioc";
-import { bootstrap } from "./../index";
+import { App } from "./../index";
 import { PluginConfig } from "./../interfaces";
 import { register } from "./../sdks/GlobalSDK";
 import SettingSDK from "./../sdks/SettingSDK";
@@ -14,16 +14,15 @@ import SystemSDK from "./../sdks/SystemSDK";
 import TelemetrySDK from "./../sdks/TelemetrySDK";
 import { UserSDK } from "./../sdks/UserSDK";
 import { TicketSDK } from "./../sdks/TicketSDK";
-import { SystemQueue, TaskExecuter, QueueReq, SystemQueueQuery } from "./../services/queue";
+import { SystemQueue, TaskExecuter, QueueReq, SystemQueueQuery } from './../services/queue/';
 export { ITaskExecuter, SystemQueueQuery, ISystemQueue } from "./../services/queue";
 @Singleton
 class ContainerAPI {
-
   @Inject userSDK : UserSDK;
   @Inject ticketSDK : TicketSDK;
   @Inject systemQueue: SystemQueue
   public async bootstrap() {
-    await bootstrap();
+    await App.bootstrap();
   }
 
   public async register(pluginId: string, pluginInfo: PluginConfig) {
@@ -69,7 +68,7 @@ class ContainerAPI {
   public getTicketSdkInstance(){
     return this.ticketSDK;
   }
-  public getSystemQueueInstance(pluginId: string){
+  public getSystemQueueInstance(pluginId: string): ISystemQueueInstance{
     const register = (type: string, taskExecuter: TaskExecuter) => {
       this.systemQueue.register(pluginId, type, taskExecuter);
     }
@@ -91,5 +90,12 @@ class ContainerAPI {
     return { register, add, query, pause, resume, cancel }
   }
 }
-
+export interface ISystemQueueInstance {
+  register(type: string, taskExecuter: TaskExecuter); 
+  add(tasks: QueueReq[] | QueueReq);
+  query(query: SystemQueueQuery, sort: any);
+  pause(_id: string); 
+  resume(_id: string);
+  cancel(_id: string);
+}
 export const containerAPI = new ContainerAPI();
