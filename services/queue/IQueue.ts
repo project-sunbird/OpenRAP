@@ -12,7 +12,7 @@ export interface ISystemQueue extends IQueue {
   _rev?: string;
   group: string;
   plugin: string;
-  status: string;
+  status: SystemQueueStatus;
   failedCode?: string;
   isActive: boolean;
   failedReason?: string;
@@ -37,7 +37,18 @@ export interface IQuery {
     };
     limit?: number;
 }
-
+export enum SystemQueueStatus {
+  reconcile = "reconcile",
+  resume = "resume",
+  inQueue = "inQueue",
+  inProgress = "inProgress",
+  pausing = "pausing",
+  paused = "paused",
+  canceling = "canceling",
+  canceled = "canceled",
+  completed = "completed",
+  failed = "failed",
+}
 export interface IUpdateQuery {
     updatedOn: number;
 }

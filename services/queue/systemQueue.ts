@@ -2,7 +2,7 @@ import { Singleton } from "typescript-ioc";
 import * as _ from "lodash";
 import { Inject } from "typescript-ioc";
 import { DataBaseSDK } from "../../sdks/DataBaseSDK";
-import { ISystemQueue } from './IQueue';
+import { ISystemQueue, SystemQueueStatus } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
 const uuid = require("uuid");
 import { Subject, Observer } from "rxjs";
@@ -204,7 +204,8 @@ export class SystemQueue {
       queueCopy.isActive = false;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
       queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
-      syncFun.error(queueCopy);
+      syncFun.next(queueCopy);
+      syncFun.complete();
       _.remove(this.runningTasks, (job) => job._id === queueCopy._id);
       this.executeNextTask();
     };
@@ -220,9 +221,10 @@ export class SystemQueue {
     };
     return { next, error, complete };
   }
-  private async remove(plugin: string, _id: string){ // not needed, should always use cancel
-  }
   public async query(plugin: string, query: SystemQueueQuery, sort: any){
+    return this.dbSDK.find(this.dbName, {
+      selector: { ...query, plugin}
+    })
   }
   public async pause(plugin: string, _id: string){
   }
@@ -277,18 +279,6 @@ export interface SystemQueueQuery {
   type?: ISystemQueue['type'][];
   group?: ISystemQueue['group'];
   indexField?: ISystemQueue['indexField'][];
-}
-export enum SystemQueueStatus {
-  reconcile = "reconcile",
-  resume = "resume",
-  inQueue = "inQueue",
-  inProgress = "inProgress",
-  pausing = "pausing",
-  paused = "paused",
-  canceling = "canceling",
-  canceled = "canceled",
-  completed = "completed",
-  failed = "failed",
 }
 
 export enum ConcurrencyLevel {
