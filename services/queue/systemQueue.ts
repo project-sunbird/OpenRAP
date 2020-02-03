@@ -101,12 +101,14 @@ export class SystemQueue {
       runTime: 0,
       isActive: true,
     }));
+    logger.info("Adding to queue for", plugin, queueData);
     await this.dbSDK.bulkDocs(this.dbName, queueData)
     .catch((err) => logger.error("SystemQueue, Error while adding task in db", err.message));
     this.executeNextTask();
     return queueData.map(({_id}) => _id);
   }
   private async executeNextTask(){
+    logger.debug("executeNextTask method called", this.lockTaskExecuter, this.runningTasks);
     if(this.lockTaskExecuter){ // prevent picking of same task more than once(for handling race condition)
       return;
     }
@@ -116,11 +118,13 @@ export class SystemQueue {
       const fetchQuery: { plugin: string, type: string }[] = [];
       let groupedRunningTask: { [task: string]: IRunningTasks[] } = _.groupBy(this.runningTasks, (task) => `${task.plugin}_${task.type}`)
       _.forIn(this.registeredTasks, (value, key) => {
-        if(_.get(groupedRunningTask[key], 'length') < this.config.concurrencyLevel){
+        if((_.get(groupedRunningTask[key], 'length') || 0) < this.config.concurrency){
           fetchQuery.push({plugin: value.plugin, type: value.type});
         }
       });
+      logger.debug("Fetch query for system queue execution", fetchQuery, groupedRunningTask);
       if(!fetchQuery.length){
+        this.lockTaskExecuter = false;
         return;
       }
       const selector = { // TODO: should limit task query at plugin/type level
@@ -128,17 +132,23 @@ export class SystemQueue {
         plugin: { $in: fetchQuery.map(data => data.plugin) },
         type: { $in: fetchQuery.map(data => data.type) }
       }
-      const { docs } = await this.dbSDK.find(this.dbName, { selector: selector, sort: ["createdOn"] })
+      const { docs } = await this.dbSDK.find(this.dbName, { selector: selector }) // sort: ["createdOn"]
       .catch((err) => {
         logger.error("Error while fetching queued jobs in pickNextTask", err.message);
         return { docs: [] };
       });
+      if(!docs || docs.length){
+        this.lockTaskExecuter = false;
+        return;
+      }
       groupedRunningTask = _.groupBy(this.runningTasks, (task) => `${task.plugin}_${task.type}`);
+      logger.debug("Docs found during execution", docs.length, groupedRunningTask);
       let queuedTaskIndex = 0;
       while (docs[queuedTaskIndex]) {
         const task: ISystemQueue = docs[queuedTaskIndex];
         const taskExecuter: TaskExecuter = _.get(this.registeredTasks[`${task.plugin}_${task.type}`], 'taskExecuter');
-        if(taskExecuter && _.get(groupedRunningTask[`${task.plugin}_${task.type}`], 'length') < this.config.concurrencyLevel){
+        const runningTaskCount = (_.get(groupedRunningTask[`${task.plugin}_${task.type}`], 'length') || 0);
+        if(taskExecuter && (runningTaskCount < this.config.concurrency)){
           const taskExecuterRef = new taskExecuter();
           const syncFunc = this.getTaskSyncFun(task);
           const observer = this.getTaskObserver(task, syncFunc);
@@ -157,7 +167,11 @@ export class SystemQueue {
             syncFunc,
           };
           this.runningTasks.push(runningTaskRef);
-          groupedRunningTask[`${task.plugin}_${task.type}`].push(runningTaskRef)
+          if(!groupedRunningTask[`${task.plugin}_${task.type}`]){
+            groupedRunningTask[`${task.plugin}_${task.type}`] = []
+          } 
+          groupedRunningTask[`${task.plugin}_${task.type}`].push(runningTaskRef);
+          logger.debug("Executing task ", runningTaskRef._id, runningTaskRef.type, runningTaskRef.plugin);
         } else if (!taskExecuter) {
           // TODO: fail all task which doesn't have task Executers
           logger.error('TaskExecuter not found for task', task.plugin, task.type);
@@ -168,6 +182,7 @@ export class SystemQueue {
       logger.error("Error while executing task", err.message);
     } finally {
       this.lockTaskExecuter = false;
+      logger.info("exited executeNextTask method");
     }
   }
   private getTaskSyncFun(taskData: ISystemQueue): Subject<ISystemQueue> {
@@ -196,7 +211,7 @@ export class SystemQueue {
     const next = (data: ISystemQueue) => {
       queueCopy = data;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
       syncFun.next(queueCopy);
     };
     const error = (err: SystemQueueError) => {
@@ -205,7 +220,7 @@ export class SystemQueue {
       queueCopy.failedReason = err.message;
       queueCopy.isActive = false;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
       syncFun.next(queueCopy);
       syncFun.complete();
     };
@@ -213,16 +228,16 @@ export class SystemQueue {
       queueCopy.isActive = false;
       queueCopy.status = SystemQueueStatus.completed;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
       syncFun.next(queueCopy);
       syncFun.complete();
     };
     return { next, error, complete };
   }
-  public async query(plugin: string, query: SystemQueueQuery, sort?: any){
-    return this.dbSDK.find(this.dbName, {
-      selector: { ...query, plugin}
-    })
+  public query(plugin: string, query: SystemQueueQuery, sort?: any){
+    const selector = { ...query, plugin};
+    logger.debug("SystemQuery method called with", selector);
+    return this.dbSDK.find(this.dbName, { selector: selector })
   }
   public async pause(plugin: string, _id: string){
   }
@@ -277,14 +292,14 @@ export interface SystemQueueQuery {
   group?: ISystemQueue['group'];
   name?: ISystemQueue['name'] | {$in: ISystemQueue['name'][]};
   isActive?: ISystemQueue['isActive']
-  createdOn?: ISystemQueue['createdOn'] | {$gt: ISystemQueue['createdOn'][]}
-  updatedOn?: ISystemQueue['updatedOn'] | {$gt: ISystemQueue['updatedOn'][]}
+  createdOn?: ISystemQueue['createdOn'] | {$gt: ISystemQueue['createdOn']}
+  updatedOn?: ISystemQueue['updatedOn'] | {$gt: ISystemQueue['updatedOn']}
 }
 
 export enum ConcurrencyLevel {
-  app,
-  plugin,
-  task
+  app = "app",
+  plugin = "plugin",
+  task = "task"
 }
 export interface Config {
   concurrency: number;
