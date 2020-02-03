@@ -14,8 +14,8 @@ import SystemSDK from "./../sdks/SystemSDK";
 import TelemetrySDK from "./../sdks/TelemetrySDK";
 import { UserSDK } from "./../sdks/UserSDK";
 import { TicketSDK } from "./../sdks/TicketSDK";
-import { SystemQueue, TaskExecuter, QueueReq, SystemQueueQuery } from './../services/queue';
-export { ITaskExecuter, SystemQueueQuery, ISystemQueue } from "./../services/queue";
+import { SystemQueue, TaskExecuter, SystemQueueReq, SystemQueueQuery } from './../services/queue';
+export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq } from "./../services/queue";
 @Singleton
 class ContainerAPI {
   @Inject userSDK : UserSDK;
@@ -72,10 +72,10 @@ class ContainerAPI {
     const register = (type: string, taskExecuter: TaskExecuter) => {
       this.systemQueue.register(pluginId, type, taskExecuter);
     }
-    const add = (tasks: QueueReq[] | QueueReq) => {
+    const add = (tasks: SystemQueueReq[] | SystemQueueReq) => {
       this.systemQueue.add(pluginId, tasks);
     }
-    const query = (query: SystemQueueQuery, sort: any) => {
+    const query = (query: SystemQueueQuery, sort?: any) => {
       this.systemQueue.query(pluginId, query, sort);
     }
     const pause = (_id: string) => {
@@ -87,15 +87,19 @@ class ContainerAPI {
     const cancel = (_id: string) => {
       this.systemQueue.cancel(pluginId, _id);
     }
-    return { register, add, query, pause, resume, cancel }
+    const retry = (_id: string) => {
+      this.systemQueue.retry(pluginId, _id);
+    }
+    return { register, add, query, pause, resume, cancel, retry }
   }
 }
 export interface ISystemQueueInstance {
   register(type: string, taskExecuter: TaskExecuter); 
-  add(tasks: QueueReq[] | QueueReq);
-  query(query: SystemQueueQuery, sort: any);
+  add(tasks: SystemQueueReq[] | SystemQueueReq);
+  query(query: SystemQueueQuery, sort?: any);
   pause(_id: string); 
   resume(_id: string);
   cancel(_id: string);
+  retry(_id: string);
 }
 export const containerAPI = new ContainerAPI();

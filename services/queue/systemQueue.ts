@@ -80,7 +80,7 @@ export class SystemQueue {
    * @param plugin 
    * @param tasks 
    */
-  public async add(plugin: string, tasks: QueueReq[] | QueueReq): Promise<string[] | SystemQueueError> {
+  public async add(plugin: string, tasks: SystemQueueReq[] | SystemQueueReq): Promise<string[] | SystemQueueError> {
     if(_.isEmpty(tasks)){
       throw {
         code: "TASK_DATA_MISSING",
@@ -218,7 +218,7 @@ export class SystemQueue {
     };
     return { next, error, complete };
   }
-  public async query(plugin: string, query: SystemQueueQuery, sort: any){
+  public async query(plugin: string, query: SystemQueueQuery, sort?: any){
     return this.dbSDK.find(this.dbName, {
       selector: { ...query, plugin}
     })
@@ -257,12 +257,11 @@ export interface TaskExecuter {
   new(): ITaskExecuter;
 }
 
-export interface QueueReq {
+export interface SystemQueueReq {
   type: ISystemQueue['type'];
-  name: ISystemQueue['name'];
   group: ISystemQueue['group']; // ex: content_manager, telemetry etc
-  data: ISystemQueue['data']; // any data required for 
-  indexField: ISystemQueue['indexField']; // ex: ecar path for import, content identifier for download/delete
+  metaData: ISystemQueue['metaData']; // any data required for 
+  name: ISystemQueue['name']; // ex: ecar path for import, content identifier for download/delete
 }
 
 export interface SystemQueueError {
@@ -275,7 +274,9 @@ export interface SystemQueueQuery {
   _id?: ISystemQueue['_id'][];
   type?: ISystemQueue['type'][];
   group?: ISystemQueue['group'];
-  indexField?: ISystemQueue['indexField'][];
+  name?: ISystemQueue['name'][];
+  isActive: ISystemQueue['isActive']
+  createdOn: ISystemQueue['createdOn']
 }
 
 export enum ConcurrencyLevel {

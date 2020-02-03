@@ -4,11 +4,9 @@ export interface IQueue {
     priority: number;
     createdOn: number;
     updatedOn: number;
-    data?: any;
 }
 
 export interface ISystemQueue extends IQueue {
-  name?: string;
   _rev?: string;
   group: string;
   plugin: string;
@@ -16,9 +14,10 @@ export interface ISystemQueue extends IQueue {
   failedCode?: string;
   isActive: boolean;
   failedReason?: string;
-  indexField: string;
+  name: string;
   runTime: number;
   progress: number;
+  metaData: any;
 }
 export interface INetworkQueue extends IQueue {
     pathToApi: string;
@@ -28,6 +27,7 @@ export interface INetworkQueue extends IQueue {
     subType: string;
     size?: number;
     count?: number;
+    data?: any;
 }
 
 export interface IQuery {
