@@ -240,12 +240,74 @@ export class SystemQueue {
     return this.dbSDK.find(this.dbName, { selector: selector })
   }
   public async pause(plugin: string, _id: string){
+    const inProgressJob: IRunningTasks = _.find(this.runningTasks, { _id });
+    if(inProgressJob){
+      const res = await inProgressJob.taskExecuterRef.pause();
+      if(!res){
+        throw "INVALID_OPERATION";
+      }
+      const queueData = inProgressJob.taskExecuterRef.status();
+      queueData.status = SystemQueueStatus.paused;
+      inProgressJob.syncFunc.next(queueData);
+      inProgressJob.syncFunc.complete();
+    } else {
+      const dbResults: ISystemQueue = await this.dbSDK.getDoc(this.dbName, _id)
+      .catch((err) => logger.error("pause error while fetching job details for ", _id));
+      if (!dbResults || _.includes([SystemQueueStatus.canceled, SystemQueueStatus.completed, SystemQueueStatus.failed,	
+        SystemQueueStatus.pausing, SystemQueueStatus.canceling], dbResults.status)) {	
+          throw "INVALID_OPERATION";	
+      }
+      dbResults.status = SystemQueueStatus.paused;
+      await this.dbSDK.updateDoc(this.dbName, _id, dbResults)
+      .catch((err) => logger.error("pause error while updating job details for ", _id));
+      this.executeNextTask();
+    }
   }
   public async resume(plugin: string, _id: string){
+    const dbResults: ISystemQueue = await this.dbSDK.getDoc(this.dbName, _id)
+    .catch((err) => logger.error("resume error while fetching job details for ", _id));
+    if (!dbResults || !_.includes([SystemQueueStatus.paused], dbResults.status)) {	
+      throw "INVALID_OPERATION";	
+    }
+    dbResults.status = SystemQueueStatus.resume;	
+    await this.dbSDK.updateDoc("content_manager", _id, dbResults)	
+      .catch((err) => logger.error("resume error while updating job details for ", _id));
+    this.executeNextTask();
   }
   public async cancel(plugin: string, _id: string){
+    const inProgressJob: IRunningTasks = _.find(this.runningTasks, { _id });
+    if(inProgressJob){
+      const res = await inProgressJob.taskExecuterRef.cancel();
+      if(!res){
+        throw "INVALID_OPERATION";
+      }
+      const queueData = inProgressJob.taskExecuterRef.status();
+      queueData.status = SystemQueueStatus.canceled;
+      inProgressJob.syncFunc.next(queueData);
+      inProgressJob.syncFunc.complete();
+    } else {
+      const dbResults: ISystemQueue = await this.dbSDK.getDoc(this.dbName, _id)
+      .catch((err) => logger.error("cancel error while fetching job details for ", _id));
+      if (!dbResults || _.includes([SystemQueueStatus.canceled, SystemQueueStatus.completed, SystemQueueStatus.failed,	
+        SystemQueueStatus.pausing, SystemQueueStatus.canceling], dbResults.status)) {	
+          throw "INVALID_OPERATION";	
+      }
+      dbResults.status = SystemQueueStatus.canceled;
+      await this.dbSDK.updateDoc(this.dbName, _id, dbResults)
+      .catch((err) => logger.error("cancel error while updating job details for ", _id));
+      this.executeNextTask();
+    }
   }
   public async retry(plugin: string, _id: string){
+    const dbResults: ISystemQueue = await this.dbSDK.getDoc(this.dbName, _id)
+    .catch((err) => logger.error("retry error while fetching job details for ", _id));
+    if (!dbResults || !_.includes([SystemQueueStatus.failed], dbResults.status)) {	
+      throw "INVALID_OPERATION";	
+    }
+    dbResults.status = SystemQueueStatus.inQueue;	
+    await this.dbSDK.updateDoc("content_manager", _id, dbResults)	
+      .catch((err) => logger.error("retry error while updating job details for ", _id));
+    this.executeNextTask();
   }
   //TODO: support custom actions
 }
