@@ -15,7 +15,7 @@ import TelemetrySDK from "./../sdks/TelemetrySDK";
 import { UserSDK } from "./../sdks/UserSDK";
 import { TicketSDK } from "./../sdks/TicketSDK";
 import { SystemQueue, TaskExecuter, SystemQueueReq, SystemQueueQuery } from './../services/queue';
-export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq } from "./../services/queue";
+export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq, SystemQueueStatus } from "./../services/queue";
 @Singleton
 class ContainerAPI {
   @Inject userSDK : UserSDK;

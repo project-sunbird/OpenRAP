@@ -143,6 +143,7 @@ export class SystemQueue {
           const syncFunc = this.getTaskSyncFun(task);
           const observer = this.getTaskObserver(task, syncFunc);
           task.status = SystemQueueStatus.inProgress;
+          task.progress = 0;
           syncFunc.next(task);
           taskExecuterRef.start(task, observer);
           const runningTaskRef = {
@@ -275,8 +276,8 @@ export interface SystemQueueQuery {
   type?: ISystemQueue['type'][];
   group?: ISystemQueue['group'];
   name?: ISystemQueue['name'][];
-  isActive: ISystemQueue['isActive']
-  createdOn: ISystemQueue['createdOn']
+  isActive?: ISystemQueue['isActive']
+  createdOn?: ISystemQueue['createdOn']
 }
 
 export enum ConcurrencyLevel {
