@@ -186,7 +186,8 @@ export class SystemQueue {
     }, error => {
       updateDb(taskData);
     }, () => {
-      // complete task 
+      _.remove(this.runningTasks, (job) => job._id === taskData._id);
+      this.executeNextTask(); 
     });
     return syncData$;
   }
@@ -206,8 +207,6 @@ export class SystemQueue {
       queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
       syncFun.next(queueCopy);
       syncFun.complete();
-      _.remove(this.runningTasks, (job) => job._id === queueCopy._id);
-      this.executeNextTask();
     };
     const complete = () => {
       queueCopy.isActive = false;
@@ -216,8 +215,6 @@ export class SystemQueue {
       queueCopy.runTime = queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000;
       syncFun.next(queueCopy);
       syncFun.complete();
-      _.remove(this.runningTasks, (job) => job._id === queueCopy._id);
-      this.executeNextTask();
     };
     return { next, error, complete };
   }
