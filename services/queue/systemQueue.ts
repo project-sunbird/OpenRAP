@@ -272,12 +272,13 @@ export interface SystemQueueError {
 }
 
 export interface SystemQueueQuery {
-  _id?: ISystemQueue['_id'][];
-  type?: ISystemQueue['type'][];
+  _id?: ISystemQueue['_id'] | {$in: ISystemQueue['_id'][]};
+  type?: ISystemQueue['type']| {$in: ISystemQueue['type'][]};
   group?: ISystemQueue['group'];
-  name?: ISystemQueue['name'][];
+  name?: ISystemQueue['name'] | {$in: ISystemQueue['name'][]};
   isActive?: ISystemQueue['isActive']
-  createdOn?: ISystemQueue['createdOn']
+  createdOn?: ISystemQueue['createdOn'] | {$gt: ISystemQueue['createdOn'][]}
+  updatedOn?: ISystemQueue['updatedOn'] | {$gt: ISystemQueue['updatedOn'][]}
 }
 
 export enum ConcurrencyLevel {
