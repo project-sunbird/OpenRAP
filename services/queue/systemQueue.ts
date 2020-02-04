@@ -5,8 +5,8 @@ import { DataBaseSDK } from "../../sdks/DataBaseSDK";
 import { ISystemQueue, SystemQueueStatus } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
 const uuid = require("uuid");
-import { Subject, Observer, asyncScheduler, Observable, mergeMap } from "rxjs";
-import { throttleTime } from "rxjs/operators";
+import { Subject, Observer, asyncScheduler, Observable } from "rxjs";
+import { throttleTime, mergeMap } from "rxjs/operators";
 export { ISystemQueue } from './IQueue';
 
 @Singleton 
