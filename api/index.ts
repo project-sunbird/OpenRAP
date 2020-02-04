@@ -70,25 +70,25 @@ class ContainerAPI {
   }
   public getSystemQueueInstance(pluginId: string): ISystemQueueInstance{
     const register = (type: string, taskExecuter: TaskExecuter) => {
-      this.systemQueue.register(pluginId, type, taskExecuter);
+      return this.systemQueue.register(pluginId, type, taskExecuter);
     }
     const add = (tasks: SystemQueueReq[] | SystemQueueReq) => {
-      this.systemQueue.add(pluginId, tasks);
+      return this.systemQueue.add(pluginId, tasks);
     }
     const query = (query: SystemQueueQuery, sort?: any) => {
-      this.systemQueue.query(pluginId, query, sort);
+      return this.systemQueue.query(pluginId, query, sort);
     }
     const pause = (_id: string) => {
-      this.systemQueue.pause(pluginId, _id);
+      return this.systemQueue.pause(pluginId, _id);
     }
     const resume = (_id: string) => {
-      this.systemQueue.resume(pluginId, _id);
+      return this.systemQueue.resume(pluginId, _id);
     }
     const cancel = (_id: string) => {
-      this.systemQueue.cancel(pluginId, _id);
+      return this.systemQueue.cancel(pluginId, _id);
     }
     const retry = (_id: string) => {
-      this.systemQueue.retry(pluginId, _id);
+      return this.systemQueue.retry(pluginId, _id);
     }
     return { register, add, query, pause, resume, cancel, retry }
   }
