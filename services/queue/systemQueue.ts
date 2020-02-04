@@ -101,7 +101,7 @@ export class SystemQueue {
       runTime: 0,
       isActive: true,
     }));
-    logger.info("Adding to queue for", plugin, queueData);
+    logger.info("Adding to queue for", plugin, queueData.length);
     await this.dbSDK.bulkDocs(this.dbName, queueData)
     .catch((err) => logger.error("SystemQueue, Error while adding task in db", err.message));
     this.executeNextTask();
@@ -198,7 +198,7 @@ export class SystemQueue {
           return taskData._rev = data.rev
         })
         .catch(err => {
-          subscriber.error(err);
+          // subscriber.error(err);
           logger.error("Error while update doc for task", taskData._id, err.message);
         });
       })
