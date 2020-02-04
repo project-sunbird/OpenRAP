@@ -5,7 +5,7 @@ import { DataBaseSDK } from "../../sdks/DataBaseSDK";
 import { ISystemQueue, SystemQueueStatus } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
 const uuid = require("uuid");
-import { Subject, Observer } from "rxjs";
+import { Subject, Observer, asyncScheduler, Observable } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 export { ISystemQueue } from './IQueue';
 
@@ -194,7 +194,20 @@ export class SystemQueue {
         logger.error("Error while update doc for task", taskData._id, err.message);
       });
     }
-    syncData$.pipe(throttleTime(500))
+    const updateDbObservable = (data) => {
+      return new Observable(subscriber => {
+        this.dbSDK.updateDoc(this.dbName, taskData._id, data)
+        .then(data => {
+          subscriber.next(data);
+          subscriber.complete();
+          return taskData._rev = data.rev
+        })
+        .catch(err => {
+          logger.error("Error while update doc for task", taskData._id, err.message);
+        });
+      })
+    }
+    syncData$.pipe(throttleTime(500, asyncScheduler, { leading: true, trailing: true }))
     .subscribe((data) => {
       data._id = taskData._id;
       data._rev = taskData._rev;
@@ -270,7 +283,7 @@ export class SystemQueue {
       throw "INVALID_OPERATION";	
     }
     dbResults.status = SystemQueueStatus.resume;	
-    await this.dbSDK.updateDoc("content_manager", _id, dbResults)	
+    await this.dbSDK.updateDoc(this.dbName, _id, dbResults)	
       .catch((err) => logger.error("resume error while updating job details for ", _id));
     this.executeNextTask();
   }
@@ -305,7 +318,7 @@ export class SystemQueue {
       throw "INVALID_OPERATION";	
     }
     dbResults.status = SystemQueueStatus.inQueue;	
-    await this.dbSDK.updateDoc("content_manager", _id, dbResults)	
+    await this.dbSDK.updateDoc(this.dbName, _id, dbResults)	
       .catch((err) => logger.error("retry error while updating job details for ", _id));
     this.executeNextTask();
   }
