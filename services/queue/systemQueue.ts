@@ -137,7 +137,7 @@ export class SystemQueue {
         logger.error("Error while fetching queued jobs in pickNextTask", err.message);
         return { docs: [] };
       });
-      if(!docs || docs.length){
+      if(!docs || !docs.length){
         this.lockTaskExecuter = false;
         return;
       }
