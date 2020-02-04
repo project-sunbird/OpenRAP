@@ -117,7 +117,7 @@ let SystemQueue = class SystemQueue {
                 };
             }
             tasks = _.isArray(tasks) ? tasks : [tasks];
-            const queueData = tasks.map(task => (Object.assign({}, task, { _id: uuid(), createdOn: Date.now(), updatedOn: Date.now(), status: IQueue_1.SystemQueueStatus.inQueue, progress: 0, plugin, priority: 1, runTime: 0, isActive: true })));
+            const queueData = tasks.map((task, index) => (Object.assign({}, task, { _id: uuid(), createdOn: Date.now() + index, updatedOn: Date.now() + index, status: IQueue_1.SystemQueueStatus.inQueue, progress: 0, plugin, priority: 1, runTime: 0, isActive: true })));
             logger_1.logger.info("Adding to queue for", plugin, queueData.length);
             yield this.dbSDK.bulkDocs(this.dbName, queueData)
                 .catch((err) => logger_1.logger.error("SystemQueue, Error while adding task in db", err.message));

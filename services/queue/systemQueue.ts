@@ -89,11 +89,11 @@ export class SystemQueue {
       }
     }
     tasks = _.isArray(tasks) ? tasks : [tasks]
-    const queueData: ISystemQueue[] = tasks.map(task => ({
+    const queueData: ISystemQueue[] = tasks.map((task, index) => ({
       ...task,
       _id: uuid(),
-      createdOn: Date.now(),
-      updatedOn: Date.now(),
+      createdOn: Date.now() + index, 
+      updatedOn: Date.now() + index,
       status: SystemQueueStatus.inQueue,
       progress: 0,
       plugin,
