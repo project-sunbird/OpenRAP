@@ -5,7 +5,7 @@ import { DataBaseSDK } from "../../sdks/DataBaseSDK";
 import { ISystemQueue, SystemQueueStatus } from './IQueue';
 import { logger } from "@project-sunbird/ext-framework-server/logger";
 const uuid = require("uuid");
-import { Subject, Observer, asyncScheduler, Observable } from "rxjs";
+import { Subject, Observer, asyncScheduler, Observable, mergeMap } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 export { ISystemQueue } from './IQueue';
 
@@ -187,15 +187,10 @@ export class SystemQueue {
   }
   private getTaskSyncFun(taskData: ISystemQueue): Subject<ISystemQueue> {
     const syncData$ = new Subject<ISystemQueue>();
-    const updateDb = (data) => {
-      this.dbSDK.updateDoc(this.dbName, taskData._id, data)
-      .then(data => taskData._rev = data.rev)
-      .catch(err => {
-        logger.error("Error while update doc for task", taskData._id, err.message);
-      });
-    }
     const updateDbObservable = (data) => {
       return new Observable(subscriber => {
+        data._id = taskData._id;
+        data._rev = taskData._rev;
         this.dbSDK.updateDoc(this.dbName, taskData._id, data)
         .then(data => {
           subscriber.next(data);
@@ -203,17 +198,17 @@ export class SystemQueue {
           return taskData._rev = data.rev
         })
         .catch(err => {
+          subscriber.error(err);
           logger.error("Error while update doc for task", taskData._id, err.message);
         });
       })
     }
-    syncData$.pipe(throttleTime(500, asyncScheduler, { leading: true, trailing: true }))
-    .subscribe((data) => {
-      data._id = taskData._id;
-      data._rev = taskData._rev;
-      updateDb(data);
+    syncData$.pipe(throttleTime(500, asyncScheduler, { leading: true, trailing: true }),
+      mergeMap(data => updateDbObservable(data))
+    ).subscribe((data) => {
+      // updateDb(data);
     }, error => {
-      updateDb(taskData);
+      // updateDb(taskData);
     }, () => {
       _.remove(this.runningTasks, (job) => job._id === taskData._id);
       this.executeNextTask(); 
@@ -296,6 +291,7 @@ export class SystemQueue {
       }
       const queueData = inProgressJob.taskExecuterRef.status();
       queueData.status = SystemQueueStatus.canceled;
+      queueData.isActive = false;
       inProgressJob.syncFunc.next(queueData);
       inProgressJob.syncFunc.complete();
     } else {
