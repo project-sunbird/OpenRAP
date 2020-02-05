@@ -29,7 +29,7 @@ export class SystemQueue {
    * This method should be called after all plugin and app are initialized
    * @param config 
    */
-  public async initialize(config: any) {
+  public async initialize(config?: any) {
     // this.config = config; TODO: support configurable concurrency
     const { docs } = await this.dbSDK.find(this.dbName, { selector: { status: SystemQueueStatus.inProgress} })
     .catch((err) => {

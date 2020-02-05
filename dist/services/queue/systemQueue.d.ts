@@ -13,7 +13,7 @@ export declare class SystemQueue {
      * This method should be called after all plugin and app are initialized
      * @param config
      */
-    initialize(config: any): Promise<void>;
+    initialize(config?: any): Promise<void>;
     /**
      * method to track progress of task.
      * this method will stop the task for which progress is not updated for configured time
