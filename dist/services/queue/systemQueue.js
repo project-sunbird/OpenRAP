@@ -35,7 +35,7 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const DEFAULT_CONCURRENCY = {
     "openrap-sunbirded-plugin_IMPORT": 1,
-    "openrap-sunbirded-plugin_DOWNLOAD": 2,
+    "openrap-sunbirded-plugin_DOWNLOAD": 1,
     "openrap-sunbirded-plugin_DELETE": 1,
     default: 1
 };
