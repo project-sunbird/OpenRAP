@@ -278,8 +278,8 @@ let SystemQueue = class SystemQueue {
             const inProgressJob = _.find(this.runningTasks, { _id });
             if (inProgressJob) {
                 const res = yield inProgressJob.taskExecuterRef.pause();
-                if (!res) {
-                    throw "INVALID_OPERATION";
+                if (res !== true) {
+                    throw res || "INVALID_OPERATION";
                 }
                 const queueData = inProgressJob.taskExecuterRef.status();
                 queueData.status = IQueue_1.SystemQueueStatus.paused;
@@ -318,8 +318,8 @@ let SystemQueue = class SystemQueue {
             const inProgressJob = _.find(this.runningTasks, { _id });
             if (inProgressJob) {
                 const res = yield inProgressJob.taskExecuterRef.cancel();
-                if (!res) {
-                    throw "INVALID_OPERATION";
+                if (res !== true) {
+                    throw res || "INVALID_OPERATION";
                 }
                 const queueData = inProgressJob.taskExecuterRef.status();
                 queueData.status = IQueue_1.SystemQueueStatus.canceled;
