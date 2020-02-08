@@ -5,7 +5,7 @@ const SuDSchedulerOptions = {
   autoStart: true,
   maxConcurrentDownloads: 1,
   downloadOptions: {
-    threads: 1, // TODO: if threads are more than one the unzip is failing due to partials combined.
+    threads: 1, // TODO: if threads are more than one the unzip is failing due to partials combined
     throttleRate: 2000,
     timeout: 60000
   }
