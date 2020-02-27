@@ -17,12 +17,14 @@ const archiver = require("archiver");
 export default class FileSDK {
   private pluginId: string;
   private prefixPath: string;
+  private contentPrefixPath: string;
 
-  constructor(pluginId: string) {
+  constructor(pluginId: string, contentPath?: string) {
     this.pluginId = pluginId;
     let fileBasePath =
       process.env.FILES_PATH || path.join(__dirname, "..", "..", "..", "..");
     this.prefixPath = path.join(fileBasePath, this.pluginId);
+    this.contentPrefixPath = "/home/ttpllt44/Videos";
   }
 
   /**
@@ -31,8 +33,9 @@ export default class FileSDK {
    * with other plugins are resolved
    * @returns Promise
    */
-  mkdir(foldersPath: string) {
-    return fse.ensureDir(path.join(this.prefixPath, foldersPath));
+  mkdir(foldersPath: string, isContentPath?) {
+    const prefix = isContentPath ? this.contentPrefixPath : this.prefixPath;
+    return fse.ensureDir(path.join(prefix, foldersPath));
   }
 
   /**
@@ -70,11 +73,12 @@ export default class FileSDK {
    * with other plugins are resolved it tries to find file from current directory to delete it
    * @returns Promise
    */
-  remove(file: string) {
-    return fse.remove(path.join(this.prefixPath, file));
+  remove(file: string, isContentPath?) {
+    const prefix = isContentPath ? this.contentPrefixPath : this.prefixPath;
+    return fse.remove(path.join(prefix, file));
   }
 
-  archiver(){
+  archiver() {
     return archiver('zip');
   }
 
@@ -135,7 +139,7 @@ export default class FileSDK {
    */
   unzip(filePath: string, destPath: string, extractToFolder: boolean) {
     //This is folder name taken from source filename and contents will be extracted to this folder name
-    let destFolderName = path.join(this.prefixPath, destPath);
+    let destFolderName = path.join(this.contentPrefixPath, destPath);
     let srcFilePath = path.join(this.prefixPath, filePath);
     if (extractToFolder) {
       destFolderName = path.join(
@@ -164,8 +168,17 @@ export default class FileSDK {
     return fse.readJson(filePath);
   }
 
-  getAbsPath(Path: string) {
-    return path.join(this.prefixPath, Path);
+  getAbsPath(Path: string, isContentPath?) {
+    const prefix = isContentPath ? this.contentPrefixPath : this.prefixPath;
+    return path.join(prefix, Path);
+  }
+
+  getContentAbsPath(Path: string, contentPrefix?: string) {
+    if (contentPrefix) {
+      return path.join(contentPrefix, Path);
+    } else {
+      return path.join(this.contentPrefixPath, Path);
+    }
   }
 
   watch(paths: string[]) {
@@ -173,7 +186,8 @@ export default class FileSDK {
   }
 
   readdir(dirPath: string) {
-    if(path.isAbsolute(dirPath)) {
+    console.log("readDir", dirPath);
+    if (path.isAbsolute(dirPath)) {
       return fse.readdir(dirPath);
     } else {
       return fse.readdir(this.getAbsPath(dirPath));

@@ -8,7 +8,7 @@ import * as _ from "lodash";
 @Singleton
 export default class SystemSDK {
   private deviceId: string;
-  constructor(pluginId?: string) {}
+  constructor(pluginId?: string) { }
 
   getDeviceId(): Promise<string> {
     if (this.deviceId) return Promise.resolve(this.deviceId);
@@ -26,7 +26,7 @@ export default class SystemSDK {
     });
   }
 
-  async getHardDiskInfo() {
+  async getHardDiskInfo(path?: string) {
     let totalHarddisk = 0;
     let availableHarddisk = 0;
     let fsSize = await si
@@ -34,21 +34,45 @@ export default class SystemSDK {
       .catch(error => logger.error(`while getting hard disk size`, error));
     if (fsSize) {
       if (os.platform() === "win32") {
-        totalHarddisk = fsSize
-          .map(mountFS => mountFS.size)
-          .reduce((acc, size) => acc + size, 0);
-        let usedHarddisk = fsSize
-          .map(mountFS => mountFS.used)
-          .reduce((acc, size) => acc + size, 0);
-        availableHarddisk = totalHarddisk - usedHarddisk;
+        if (path) {
+          const selectedDrive = fsSize.find((driveInfo) => path.startsWith(driveInfo.fs))
+          totalHarddisk = selectedDrive.size;
+          availableHarddisk = totalHarddisk - selectedDrive.used;
+          console.log("totalHarddisk", totalHarddisk);
+          console.log("availableHarddisk", availableHarddisk);
+        } else {
+          totalHarddisk = fsSize
+            .map(mountFS => mountFS.size)
+            .reduce((acc, size) => acc + size, 0);
+          let usedHarddisk = fsSize
+            .map(mountFS => mountFS.used)
+            .reduce((acc, size) => acc + size, 0);
+          availableHarddisk = totalHarddisk - usedHarddisk;
+        }
       } else {
         totalHarddisk = _.find(fsSize, { mount: "/" })["size"] || 0;
         let usedHarddisk = _.find(fsSize, { mount: "/" })["used"] || 0;
         availableHarddisk = totalHarddisk - usedHarddisk;
       }
+      /* const selectedDrive = fsSize.find((driveInfo) => path.startsWith(driveInfo.fs));
+      console.log("selectedDrive", selectedDrive);
+      console.log("fsSize", fsSize);
+      if(selectedDrive) {selectedDrive
+        totalHarddisk = selectedDrive.size;
+        availableHarddisk = totalHarddisk - selectedDrive.used;
+        console.log("totalHarddisk===========", totalHarddisk);
+        console.log("availableHarddisk=============", availableHarddisk);
+      } */
     }
 
-    return { totalHarddisk, availableHarddisk };
+    return { totalHarddisk, availableHarddisk, fsSize };
+  }
+
+  async getHardDiskDrives() {
+    let fsSize = await si
+      .fsSize()
+      .catch(error => logger.error(`while getting hard disk size`, error));
+    return fsSize;
   }
 
   async getMemoryInfo() {
@@ -63,16 +87,16 @@ export default class SystemSDK {
     }
     return { totalMemory, availableMemory };
   }
-  async getCpuLoad(){
+  async getCpuLoad() {
     let currentLoad = await si
-    .currentLoad()
-    .catch(err => logger.error("while reading CPU Load ", err));
+      .currentLoad()
+      .catch(err => logger.error("while reading CPU Load ", err));
     return currentLoad;
   }
-  async getNetworkInfo(){
+  async getNetworkInfo() {
     let networkInfo = await si
-    .networkInterfaces()
-    .catch(err => logger.error("while reading Network info", err));
+      .networkInterfaces()
+      .catch(err => logger.error("while reading Network info", err));
     return networkInfo;
   }
   async getDeviceInfo() {

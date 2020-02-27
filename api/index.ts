@@ -43,8 +43,8 @@ class ContainerAPI {
 
   // get file SDK by plugin
 
-  public getFileSDKInstance(pluginId: string): FileSDK {
-    return new FileSDK(pluginId);
+  public getFileSDKInstance(pluginId: string, contentPathPrefix?): FileSDK {
+    return new FileSDK(pluginId, contentPathPrefix);
   }
   public getDownloadSdkInstance(){
     return this.downloadSDK;
