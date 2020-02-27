@@ -7,32 +7,16 @@
             "name": "settings"
         },
         {
-            "name": "telemetry_packets",
+            "name": "queue",
             "indexes": [
                 {
                     "index": {
                         "fields": [
-                            "pluginId",
-                            "status",
-                            "updatedOn"
+                            "type",
+                            "subType"
                         ]
                     },
-                    "name": "filterIndex"
-                }
-            ]
-        },
-        {
-            "name": "download_queue",
-            "indexes": [
-                {
-                    "index": {
-                        "fields": [
-                            "pluginId",
-                            "status",
-                            "updatedOn"
-                        ]
-                    },
-                    "name": "filterIndex"
+                    "name": "queueIndex"
                 }
             ]
         },
@@ -55,6 +39,41 @@
                     "index": {
                         "fields": [
                             "name"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "system_queue",
+            "indexes": [
+                {
+                    "index": {
+                        "fields": [
+                            "plugin",
+                            "type",
+                            "group"
+                        ]
+                    }
+                },
+                {
+                    "index": {
+                        "fields": [
+                            "plugin",
+                            "type",
+                            "group",
+                            "indexField"
+                        ]
+                    }
+                },
+                {
+                    "index": {
+                        "fields": [
+                            "plugin",
+                            "type",
+                            "group",
+                            "indexField",
+                            "_id"
                         ]
                     }
                 }

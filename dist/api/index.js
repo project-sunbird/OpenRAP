@@ -29,15 +29,22 @@ const GlobalSDK_1 = require("./../sdks/GlobalSDK");
 const SettingSDK_1 = __importDefault(require("./../sdks/SettingSDK"));
 const FileSDK_1 = __importDefault(require("./../sdks/FileSDK"));
 const NetworkSDK_1 = __importDefault(require("./../sdks/NetworkSDK"));
-const DownloadManager_1 = __importDefault(require("./../managers/DownloadManager/DownloadManager"));
 const SystemSDK_1 = __importDefault(require("./../sdks/SystemSDK"));
 const TelemetrySDK_1 = __importDefault(require("./../sdks/TelemetrySDK"));
 const UserSDK_1 = require("./../sdks/UserSDK");
 const TicketSDK_1 = require("./../sdks/TicketSDK");
+const DownloadSDK_1 = require("./../sdks/DownloadSDK");
+const queue_1 = require("./../services/queue");
+var queue_2 = require("./../services/queue");
+exports.SystemQueueStatus = queue_2.SystemQueueStatus;
+const EventManager_1 = require("@project-sunbird/ext-framework-server/managers/EventManager");
 let ContainerAPI = class ContainerAPI {
     bootstrap() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield index_1.bootstrap();
+            yield index_1.App.bootstrap();
+            EventManager_1.EventManager.subscribe("app:initialized", () => {
+                this.systemQueue.initialize();
+            });
         });
     }
     register(pluginId, pluginInfo) {
@@ -53,6 +60,9 @@ let ContainerAPI = class ContainerAPI {
     getFileSDKInstance(pluginId) {
         return new FileSDK_1.default(pluginId);
     }
+    getDownloadSdkInstance() {
+        return this.downloadSDK;
+    }
     // get the Network SDK
     getNetworkStatus(url) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -60,10 +70,6 @@ let ContainerAPI = class ContainerAPI {
             let status = yield networkSDK.isInternetAvailable(url);
             return status;
         });
-    }
-    // get the downloadManager Instance
-    getDownloadManagerInstance(pluginId) {
-        return new DownloadManager_1.default(pluginId);
     }
     getSystemSDKInstance(pluginId) {
         return new SystemSDK_1.default(pluginId);
@@ -77,6 +83,36 @@ let ContainerAPI = class ContainerAPI {
     getTicketSdkInstance() {
         return this.ticketSDK;
     }
+    initializeSystemQueue() {
+        this.systemQueue.initialize();
+    }
+    getSystemQueueInstance(pluginId) {
+        const register = (type, taskExecuter) => {
+            return this.systemQueue.register(pluginId, type, taskExecuter);
+        };
+        const add = (tasks) => {
+            return this.systemQueue.add(pluginId, tasks);
+        };
+        const query = (query, sort) => {
+            return this.systemQueue.query(pluginId, query, sort);
+        };
+        const pause = (_id) => {
+            return this.systemQueue.pause(pluginId, _id);
+        };
+        const resume = (_id) => {
+            return this.systemQueue.resume(pluginId, _id);
+        };
+        const cancel = (_id) => {
+            return this.systemQueue.cancel(pluginId, _id);
+        };
+        const retry = (_id) => {
+            return this.systemQueue.retry(pluginId, _id);
+        };
+        const migrate = (tasks) => {
+            return this.systemQueue.migrate(tasks);
+        };
+        return { register, add, query, pause, resume, cancel, retry, migrate };
+    }
 };
 __decorate([
     typescript_ioc_1.Inject,
@@ -86,6 +122,14 @@ __decorate([
     typescript_ioc_1.Inject,
     __metadata("design:type", TicketSDK_1.TicketSDK)
 ], ContainerAPI.prototype, "ticketSDK", void 0);
+__decorate([
+    typescript_ioc_1.Inject,
+    __metadata("design:type", queue_1.SystemQueue)
+], ContainerAPI.prototype, "systemQueue", void 0);
+__decorate([
+    typescript_ioc_1.Inject,
+    __metadata("design:type", DownloadSDK_1.DownloadSDK)
+], ContainerAPI.prototype, "downloadSDK", void 0);
 ContainerAPI = __decorate([
     typescript_ioc_1.Singleton
 ], ContainerAPI);
