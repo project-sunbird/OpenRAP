@@ -15,7 +15,7 @@ const defaultMethodLoggerOptions: IMethodLoggerOptions = {
 export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMethodLoggerOptions) {
   return function (constructor) {
     Object.getOwnPropertyNames(constructor.prototype).filter(
-      (methodName: string) => (!classLoggerOptions.logMethods || _.includes(classLoggerOptions.logMethods, methodName)) && (methodName !== 'constructor')
+      (methodName: string) => (!classLoggerOptions.logMethods || _.includes(classLoggerOptions.logMethods, methodName)) && (methodName !== 'constructor') && (typeof(constructor.prototype[methodName]) === "function")
       // (methodName: string) => (!classLoggerOptions.logMethods && _.includes(classLoggerOptions.logMethods, methodName)) && (methodName !== 'constructor')
     )
       .forEach(methodName => {
