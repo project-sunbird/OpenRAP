@@ -13,20 +13,19 @@ const defaultMethodLoggerOptions: IMethodLoggerOptions = {
   logTime: false
 }
 export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMethodLoggerOptions) {
-  return function(constructor) {
-    console.log("==============> classDecorator called for <=========================", constructor.prototype);
-    _.keys(constructor.prototype).filter(
-      (methodName: string) => !classLoggerOptions.logMethods || _.includes(classLoggerOptions.logMethods, methodName)
-      // (methodName: string) => classLoggerOptions.logMethods && classLoggerOptions.logMethods.includes(methodName)
+  return function (constructor) {
+    Object.getOwnPropertyNames(constructor.prototype).filter(
+      (methodName: string) => (!classLoggerOptions.logMethods || _.includes(classLoggerOptions.logMethods, methodName)) && (methodName !== 'constructor')
+      // (methodName: string) => (!classLoggerOptions.logMethods && _.includes(classLoggerOptions.logMethods, methodName)) && (methodName !== 'constructor')
     )
-    .forEach(methodName => {
-      const originalMethod = constructor.prototype[methodName];
-      console.log("==============> classDecorator warping method <=========================", methodName);
-      constructor.prototype[methodName] = wrapMethodWithLogAsync(originalMethod, methodName, constructor.name, {
-        logLevel: classLoggerOptions.logLevel, 
-        logTime: classLoggerOptions.logTime
+      .forEach(methodName => {
+        const originalMethod = constructor.prototype[methodName];
+        logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
+        constructor.prototype[methodName] = wrapMethodWithLogAsync(originalMethod, methodName, constructor.name, {
+          logLevel: classLoggerOptions.logLevel,
+          logTime: classLoggerOptions.logTime
+        });
       });
-    });
   }
 }
 export function MethodLogger(methodLogOption: IMethodLoggerOptions = defaultMethodLoggerOptions): any {
@@ -35,7 +34,7 @@ export function MethodLogger(methodLogOption: IMethodLoggerOptions = defaultMeth
   };
 }
 function wrapMethodWithLog(method: Function, methodName: string, className: string, options: IMethodLoggerOptions): Function {
-  return function(...args) {
+  return function (...args) {
     const startHrTime = process.hrtime();
     const loggerMethod = logger[options.logLevel] || logger.debug
     try {
@@ -45,7 +44,7 @@ function wrapMethodWithLog(method: Function, methodName: string, className: stri
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
       logger[options.logLevel](`===> ${className}.${methodName} returned with: `, result, `. Took ${endTime} sec`);
       return result;
-    } catch(error) {
+    } catch (error) {
       const diff = process.hrtime(startHrTime);
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
       logger[options.logLevel](`===> ${className}.${methodName} failed with: `, error, `. Took ${endTime} sec`);
@@ -54,7 +53,7 @@ function wrapMethodWithLog(method: Function, methodName: string, className: stri
   };
 };
 function wrapMethodWithLogAsync(method: Function, methodName: string, className: string, options: IMethodLoggerOptions): Function {
-  return async function(...args) {
+  return async function (...args) {
     const startHrTime = process.hrtime();
     const loggerMethod = logger[options.logLevel] || logger.info
     try {
@@ -64,7 +63,7 @@ function wrapMethodWithLogAsync(method: Function, methodName: string, className:
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
       logger[options.logLevel](`${className}.${methodName} returned with: `, result, `. Took ${endTime} sec`);
       return result;
-    } catch(error) {
+    } catch (error) {
       const diff = process.hrtime(startHrTime);
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
       logger[options.logLevel](`${className}.${methodName} failed with: `, error, `. Took ${endTime} sec`);
