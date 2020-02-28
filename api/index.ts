@@ -16,7 +16,7 @@ import { TicketSDK } from "./../sdks/TicketSDK";
 import { initLogger } from "./../services/logger/loggerService";
 export * from "./../services/logger/logDecorators";
 export { logger } from "./../services/logger/loggerService"
-
+export * from "./../services/logger/logDecorators"
 import { DownloadSDK } from "./../sdks/DownloadSDK";
 import { SystemQueue, TaskExecuter, SystemQueueReq, SystemQueueQuery, ISystemQueue } from './../services/queue';
 export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq, SystemQueueStatus } from "./../services/queue";

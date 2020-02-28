@@ -2,7 +2,6 @@
 const log4js = require('log4js');
 import * as path from 'path';
 const logger = log4js.getLogger();
-logger.level = 'off';
 type loggerLevels = 'all' | 'trace' | 'fatal' | 'error' | 'off' | 'info' | 'warn' | 'debug'
 const defaultConfig = {
   basePath: path.join(__dirname, './../../../../../'), // default to parent root directory
@@ -51,6 +50,7 @@ function initLogger(config = defaultConfig) {
       "http": { "appenders": ["access"], "level": "DEBUG" }
     }
   });
-  logger.level = 'off' || config.logLevel;
+  logger.level = config.logLevel;
 }
+initLogger()
 export { logger, initLogger, loggerLevels };
