@@ -21,6 +21,9 @@ export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMet
       .forEach(methodName => {
         const originalMethod = constructor.prototype[methodName];
         logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
+        if(originalMethod.__loggerAttached){
+          return;
+        }
         constructor.prototype[methodName] = wrapMethodWithLogAsync(originalMethod, methodName, constructor.name, {
           logLevel: classLoggerOptions.logLevel,
           logTime: classLoggerOptions.logTime
@@ -30,7 +33,12 @@ export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMet
 }
 export function MethodLogger(methodLogOption: IMethodLoggerOptions = defaultMethodLoggerOptions): any {
   return function (classRef: any, methodName: string, methodRef: PropertyDescriptor) {
+    if (methodRef === undefined) {
+      methodRef = Object.getOwnPropertyDescriptor(classRef, methodName);
+    }
     methodRef.value = wrapMethodWithLogAsync(methodRef.value, methodName, classRef.constructor.name, methodLogOption);
+    methodRef.value.__loggerAttached = true;
+    logger.debug(`==============> MethodLogger: ${classRef.constructor.name}.${methodName} wrapped with logger <=========================`);
   };
 }
 function wrapMethodWithLog(method: Function, methodName: string, className: string, options: IMethodLoggerOptions): Function {
