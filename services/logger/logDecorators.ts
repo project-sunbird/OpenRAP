@@ -23,11 +23,11 @@ export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMet
         if(originalMethod.__loggerAttached){
           return;
         }
-        logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
         constructor.prototype[methodName] = wrapMethodWithLogAsync(originalMethod, methodName, constructor.name, {
           logLevel: classLoggerOptions.logLevel,
           logTime: classLoggerOptions.logTime
         });
+        logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
       });
   }
 }
@@ -45,8 +45,8 @@ function wrapMethodWithLog(method: Function, methodName: string, className: stri
   return function (...args) {
     const startHrTime = process.hrtime();
     const loggerMethod = logger[options.logLevel] || logger.debug
-    try {
-      logger[options.logLevel](`${className}.${methodName} called with: `, ...args);
+    try {   
+      logger[options.logLevel](`${className}.${methodName} called with: `, args);
       const result = method.apply(this, args);
       const diff = process.hrtime(startHrTime);
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
@@ -65,7 +65,19 @@ function wrapMethodWithLogAsync(method: Function, methodName: string, className:
     const startHrTime = process.hrtime();
     const loggerMethod = logger[options.logLevel] || logger.info
     try {
-      logger[options.logLevel](`${className}.${methodName} called with: `, ...args);
+      const argMap = args.map(arg => {
+        if(typeof(arg) === 'function'){
+          return 'function';
+        }
+        if(_.get(arg, "__proto__.constructor.name") === "IncomingMessage"){
+          return 'RequestObject';
+        }
+        if(_.get(arg, "__proto__.constructor.name") === "ServerResponse"){
+          return 'ResponseObject';
+        }
+        return arg;
+      }); 
+      logger[options.logLevel](`${className}.${methodName} called with: `, ...argMap);
       const result = await method.apply(this, args);
       const diff = process.hrtime(startHrTime);
       const endTime = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
