@@ -20,10 +20,10 @@ export function ClassLogger(classLoggerOptions: IClassLoggerOptions = defaultMet
     )
       .forEach(methodName => {
         const originalMethod = constructor.prototype[methodName];
-        logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
         if(originalMethod.__loggerAttached){
           return;
         }
+        logger.debug(`==============> ClassLogger: ${constructor.name}.${methodName} wrapped with logger <=========================`);
         constructor.prototype[methodName] = wrapMethodWithLogAsync(originalMethod, methodName, constructor.name, {
           logLevel: classLoggerOptions.logLevel,
           logTime: classLoggerOptions.logTime
