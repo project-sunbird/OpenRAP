@@ -7,6 +7,7 @@ import { Inject, Singleton } from "typescript-ioc";
 import * as _ from "lodash";
 import SystemSDK from "../sdks/SystemSDK";
 import { logger } from "@project-sunbird/logger";
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 import * as zlib from "zlib";
 import * as path from "path";
 import * as fs from "fs";
