@@ -15,7 +15,7 @@ export class TicketSDK {
   constructor() { }
 
   async createTicket(ticketReq: ITicketReq): Promise<{ message: string, code: string, status: number }> {
-    logger.info('Create ticket method has been called',);
+    logger.info('Create ticket method has been called');
     if (!ticketReq || !ticketReq.email || !ticketReq.description) {
       throw {
         status: 400,
