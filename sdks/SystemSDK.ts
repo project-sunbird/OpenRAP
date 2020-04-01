@@ -114,7 +114,8 @@ export default class SystemSDK {
       totalMemory: 0,
       availableMemory: 0,
       totalHarddisk: 0,
-      availableHarddisk: 0
+      availableHarddisk: 0,
+      drives: undefined
     };
 
     deviceInfo.id = await this.getDeviceId();
@@ -167,12 +168,13 @@ export default class SystemSDK {
         graphics["displays"][0].currentResY;
     }
 
-    let hardDiskInfo = await this.getHardDiskInfo();
+    const hardDiskInfo = await this.getHardDiskInfo();
 
     deviceInfo.totalHarddisk = hardDiskInfo.totalHarddisk;
     deviceInfo.availableHarddisk = hardDiskInfo.availableHarddisk;
+    deviceInfo.drives = hardDiskInfo.fsSize;
 
-    let memoryInfo = await this.getMemoryInfo();
+    const memoryInfo = await this.getMemoryInfo();
     deviceInfo.totalMemory = memoryInfo.totalMemory;
     deviceInfo.availableMemory = memoryInfo.availableMemory;
 
