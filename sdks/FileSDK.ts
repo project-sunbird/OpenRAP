@@ -31,8 +31,9 @@ export default class FileSDK {
    * with other plugins are resolved
    * @returns Promise
    */
-  mkdir(foldersPath: string) {
-    return fse.ensureDir(path.join(this.prefixPath, foldersPath));
+  mkdir(foldersPath: string, customPath?) {
+    const pathUrl = customPath ? customPath : this.prefixPath;
+    return fse.ensureDir(path.join(pathUrl, foldersPath));
   }
 
   /**
@@ -133,10 +134,16 @@ export default class FileSDK {
    * This method will unzip the file to dest folder
    * @returns Promise
    */
-  unzip(filePath: string, destPath: string, extractToFolder: boolean) {
+  unzip(filePath: string, destPath: string, extractToFolder: boolean, customContentPath?: string) {
     //This is folder name taken from source filename and contents will be extracted to this folder name
+    // let destFolderName = path.join(this.getContentPath(), destPath);
     let destFolderName = path.join(this.prefixPath, destPath);
     let srcFilePath = path.join(this.prefixPath, filePath);
+
+    if (customContentPath) {
+      destFolderName = path.join(customContentPath, destPath);
+      srcFilePath = path.join(customContentPath, filePath);
+    }
     if (extractToFolder) {
       destFolderName = path.join(
         destFolderName,
