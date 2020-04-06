@@ -56,7 +56,7 @@ class ContainerAPI {
   public getDownloadSdkInstance(){
     return this.downloadSDK;
   }
-  public getPerfLoggerInstance(){
+  public getPerfLoggerInstance(): PerfLogger {
     return this.perfLogger;
   }
   // get the Network SDK

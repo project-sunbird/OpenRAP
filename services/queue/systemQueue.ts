@@ -9,6 +9,7 @@ import { Subject, Observer, asyncScheduler, Observable } from "rxjs";
 import { throttleTime, mergeMap } from "rxjs/operators";
 import { TelemetryInstance } from './../telemetry/telemetryInstance';
 export { ISystemQueue } from './IQueue';
+import { EventManager } from "@project-sunbird/ext-framework-server/managers/EventManager";
 const DEFAULT_CONCURRENCY = {
   "openrap-sunbirded-plugin_IMPORT": 1,
   "openrap-sunbirded-plugin_DOWNLOAD": 1,
@@ -17,6 +18,7 @@ const DEFAULT_CONCURRENCY = {
 }
 @Singleton 
 export class SystemQueue {
+  public static taskCompleteEvent =  "SystemQueue:TASK_COMPLETE";
   @Inject private dbSDK: DataBaseSDK;
   @Inject private telemetryInstance: TelemetryInstance;
   private dbName = 'system_queue';
@@ -254,6 +256,7 @@ export class SystemQueue {
       queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
       syncFun.next(queueCopy);
       syncFun.complete();
+      EventManager.emit(SystemQueue.taskCompleteEvent, queueCopy); // used in perf log generation
     };
     return { next, error, complete };
   }
