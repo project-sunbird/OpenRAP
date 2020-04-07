@@ -11,7 +11,7 @@ import { timer } from 'rxjs';
 import { EventManager } from "@project-sunbird/ext-framework-server/managers/EventManager";
 import { SystemQueue, ISystemQueue } from './../../services/queue';
 
-const INITIAL_TRIGGER = 5000 || 15 * 60 * 1000; // trigger first job after 15 min  
+const INITIAL_TRIGGER = 15 * 60 * 1000; // trigger first job after 15 min  
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000; // trigger jobs every 24 hours after first trigger
 const MONTH_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000; // used in archive job to remove logs which are older than last 30 days
 const LOG_QUERY_LIMIT = 1000;

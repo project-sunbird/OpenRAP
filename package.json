@@ -49,13 +49,14 @@
     "lodash": "^4.17.11",
     "pouchdb": "^7.1.1",
     "pouchdb-find": "^7.1.1",
+    "sinon": "^9.0.1",
     "su-downloader3": "^1.0.8",
     "systeminformation": "^4.14.17",
     "typescript-ioc": "^3.0.4"
   },
   "devDependencies": {
     "@project-sunbird/ext-framework-server": "^0.1.26",
-    "@project-sunbird/logger": "0.0.4",
+    "@project-sunbird/logger": "0.0.6",
     "@types/archiver": "^2.1.3",
     "@types/body-parser": "^1.17.0",
     "@types/chai": "^4.1.7",
