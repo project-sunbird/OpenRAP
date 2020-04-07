@@ -3,4 +3,5 @@ export interface IPerfLog<T> {
     time: number;
     createdOn?: number;
     metaData: T
+    _id?: string;
 }

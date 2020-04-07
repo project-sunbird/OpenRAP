@@ -9,12 +9,16 @@ import { IPerfLog } from './IPerfLog';
 import { timer } from 'rxjs';
 import { EventManager } from "@project-sunbird/ext-framework-server/managers/EventManager";
 import { SystemQueue, ISystemQueue } from './../../services/queue';
+
 const INITIAL_TRIGGER = 5000 || 15 * 60 * 1000; // trigger first job after 15 min  
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000; // trigger jobs every 24 hours after first trigger
+const MONTH_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000; // used in archive job to remove logs which are older than last 30 days
+const LOG_QUERY_LIMIT = 1000;
 const DB_NAME = 'perf_log';
-const LAST_PERF_SYNC_KEY = 'LAST_PERF_SYNC_TIME';
-const REQUIRED_SYSTEM_QUEUE_TASK = ["IMPORT", "DOWNLOAD"];
+const LAST_PERF_LOG_PROCEEDED_ON = 'LAST_PERF_LOG_PROCEEDED_ON';
+const REQUIRED_SYSTEM_QUEUE_TASK = ["IMPORT", "DOWNLOAD"]; // should be moved to openrap-sunbirded-plugin to make it customizable
 const DEFAULT_LAST_SYNC_TIME = 1585282913052;
+
 @Singleton
 export class PerfLogger {
     @Inject private dbSDK: DataBaseSDK;
@@ -25,6 +29,7 @@ export class PerfLogger {
             if(!_.includes(REQUIRED_SYSTEM_QUEUE_TASK, data.type)){
                 return;
             }
+            // TODO: divide time by contentSize
             this.log({
                 type: data.type,
                 time: data.runTime,
@@ -32,56 +37,66 @@ export class PerfLogger {
               });
         });
     }
-    private async handleTimerEvent(triggerCount) {
-        console.debug(`========> aggregateLogs triggered: count - ${triggerCount} <========`);
-        try {
-            await this.aggregateLogs();
-            console.debug(`========> aggregateLogs completed for count - ${triggerCount} <========`);
-        } catch (error) {
-            console.error(`========> aggregateLogs failed for count - ${triggerCount} <========`, error);
-        }
-    }
+
     private async aggregateLogs() {
-        const lastSyncTime = await this.settingSDK.get(LAST_PERF_SYNC_KEY).catch(error => undefined);
-        const startTime = lastSyncTime ? this.getStartAndEndEpochTime(lastSyncTime + 1).startTime
-            : this.getStartAndEndEpochTime(DEFAULT_LAST_SYNC_TIME).startTime;
-        const endTime = this.getStartAndEndEpochTime().endTime;
-        const logIterator = this.getAsyncIterator({startTime, endTime});
-        let count = 0;
-        for await (const log of logIterator) {
-            count++;
-            // console.debug("========> ", log);
+        const lastSyncDateStoredInDB = await this.settingSDK.get(LAST_PERF_LOG_PROCEEDED_ON).catch(error => undefined);
+        const lastSyncedDate = lastSyncDateStoredInDB ? this.getStartAndEndEpochTime(lastSyncDateStoredInDB)
+            : this.getStartAndEndEpochTime(DEFAULT_LAST_SYNC_TIME);
+        const endDate = this.getStartAndEndEpochTime();
+        let aggregatedLog = {};
+        let currentEndTime = this.getStartAndEndEpochTime(lastSyncedDate.endTime + 1).endTime;
+        let perfLogs = this.getUnProcessedLogs({startTime: lastSyncedDate.endTime + 1, endTime: endDate.startTime - 1}, LOG_QUERY_LIMIT);
+
+        for await (const log of perfLogs) {
+            if(log.createdOn > currentEndTime) {
+                await this.generateMetrics(aggregatedLog, currentEndTime);
+                aggregatedLog = {};
+                currentEndTime = this.getStartAndEndEpochTime(log.createdOn).endTime;
+            }
+            if(!aggregatedLog[log.type]){
+                aggregatedLog[log.type] = [];
+            }
+            aggregatedLog[log.type].push(log);
         }
-        console.debug("=====================> perf_log processed <============================", lastSyncTime, count);
+        this.generateMetrics(aggregatedLog, currentEndTime);
     }
-    private getAsyncIterator({startTime, endTime}){
+    private async generateMetrics(aggregatedLog, currentEndTime) {
+        if(_.isEmpty(aggregatedLog)) {
+            return;
+        }
+        // TODO: aggregate logs based on type and log metric event
+        await this.updateLastSyncDate(currentEndTime); // update last processed time
+        console.debug('=======> generateMetrics for <=======', currentEndTime, aggregatedLog);
+    }
+    private async updateLastSyncDate(currentEndTime){
+        await this.settingSDK.put(LAST_PERF_LOG_PROCEEDED_ON, currentEndTime); // should be un-commented
+    }
+    private getUnProcessedLogs({startTime, endTime}, limit){
         const that = this;
-        const genFunc = async function* () {
+        const generatorFunction = async function* () {
             let lastProcessedContent: any = {};
             while(true) {
-                let logs = await that.getLogsFromDB({startTime, endTime});
+                let logs = await that.getLogsFromDB({startTime, endTime}, {limit});
                 const lastProcessedContentIndex = _.findIndex(logs, { _id: lastProcessedContent._id});
-                console.log('lastProcessedContentIndex', lastProcessedContentIndex);
                 if (lastProcessedContentIndex !== -1) {
-                    logs = logs.slice(lastProcessedContentIndex + 1);
+                    logs = logs.slice(lastProcessedContentIndex + 1); // slice off already processed data
                 }
-                console.log('logs after splice', logs);
                 if(!logs.length){
                     return; // terminates generator 
                 }
                 for (const log of logs) {
-                    yield log
+                    yield log;
                 }
-                lastProcessedContent = logs[logs.length - 1];
-                startTime = lastProcessedContent.createdOn;
+                lastProcessedContent = logs[logs.length - 1]; // used to remove already processed data
+                startTime = lastProcessedContent.createdOn; // update start time with last fetched rows createdOn
             }
         }
         return {
-            [Symbol.asyncIterator]: genFunc
+            [Symbol.asyncIterator]: generatorFunction
         }
     }
-    private async getLogsFromDB({startTime, endTime}){
-        console.debug("=====================> getLogsFromDB called with <============================", startTime, endTime);
+    private async getLogsFromDB<T>({startTime, endTime}: {startTime: number, endTime: number},
+            {fields, limit}: { fields?: string[], limit?: number}): Promise<IPerfLog<T>[]> {
         const query = {
             selector: {
                 createdOn: {
@@ -89,8 +104,13 @@ export class PerfLogger {
                     "$lte": endTime
                 }
             },
-            limit: 2,
             sort: ['createdOn']
+        }
+        if(limit){
+            query['limit'] = limit;
+        }
+        if (fields) {
+            query['fields'] = fields;
         }
         return this.dbSDK.find(DB_NAME, query).then(data => data.docs);
     }
@@ -112,5 +132,30 @@ export class PerfLogger {
             logger.error("perf_log data insertion error", error);
         });
         console.debug("=====================> logging perf log <============================", logData, this.getStartAndEndEpochTime());
+    }
+    private async handleTimerEvent(triggerCount) {
+        try {
+            console.debug(`========> aggregateLogs triggered: count - ${triggerCount} <========`);
+            await this.aggregateLogs();
+            await this.archiveOldLogs();
+            console.debug(`========> aggregateLogs completed for count - ${triggerCount} <========`);
+        } catch (error) {
+            console.error(`========> aggregateLogs failed for count - ${triggerCount} <========`, error);
+        }
+    }
+    private async archiveOldLogs(){
+
+        let endDate = this.getStartAndEndEpochTime().startTime - 1 * MONTH_IN_MILLISECONDS;
+        let archiveLogs = await this.getLogsFromDB({startTime: 0, endTime: endDate}, {fields: ['_id', '_rev']});
+
+        if(!archiveLogs || !archiveLogs.length){
+            return;
+        }
+        console.log("archiveLogs", archiveLogs, endDate, archiveLogs.length);
+        archiveLogs = archiveLogs.map(log => {
+            log['_deleted'] = true;
+            return log;
+        })
+        await this.dbSDK.bulkDocs(DB_NAME, archiveLogs);
     }
 }
