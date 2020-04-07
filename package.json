@@ -79,6 +79,6 @@
     "uuid": "^3.3.2"
   },
   "peerDependencies": {
-    "@project-sunbird/logger": "0.0.4"
+    "@project-sunbird/logger": "0.0.6"
   }
 }
