@@ -35,6 +35,7 @@ class ContainerAPI {
     await App.bootstrap();
     EventManager.subscribe("app:initialized", () => {
       this.systemQueue.initialize();
+      this.perfLogger.initialize();
     });
   }
 
