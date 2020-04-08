@@ -45,6 +45,18 @@
             ]
         },
         {
+            "name": "perf_log",
+            "indexes": [
+                {
+                    "index": {
+                        "fields": [
+                            "createdOn"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
             "name": "system_queue",
             "indexes": [
                 {
