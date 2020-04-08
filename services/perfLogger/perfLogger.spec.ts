@@ -25,7 +25,7 @@ const mockDataBaseSDK = {
     return Promise.resolve({docs: matchedRows});
   }
 }
-describe.only('PerfLogger', async () => {
+describe('PerfLogger', async () => {
   let perfLogger;
   let clock;
   before(async () => {
