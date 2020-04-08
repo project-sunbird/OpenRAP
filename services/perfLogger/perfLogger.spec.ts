@@ -1,17 +1,11 @@
 import { PerfLogger } from './index';
-// import { perfLogDataSet1 } from './perfLogger.spec.data';
-const sinon = require('sinon');
-const chai = require('chai');
-const spies = require('chai-spies');
+import { perfLogDataSet1, INITIAL_TRIGGER, DAY_IN_MILLISECONDS, MONTH_IN_MILLISECONDS } from './perfLogger.spec.data';
+const sinon = require('sinon'), chai = require('chai'), pies = require('chai-spies');
 chai.use(spies);
-const spy = chai.spy.sandbox();
-const expect = chai.expect;
+const spy = chai.spy.sandbox(), expect = chai.expect;
 
-const INITIAL_TRIGGER = 15 * 60 * 1000; // trigger first job after 15 min  
-const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000; // trigger jobs every 24 hours after first trigger
-const MONTH_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000; // used in archive job to remove logs which are older than last 30 days
 const mockDataBaseSDK = {
-  perf_log: [],
+  data: [],
   bulkDocs: (db_name, data) => {
     this.perf_log = data;
     return Promise.resolve();

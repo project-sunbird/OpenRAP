@@ -32,14 +32,14 @@ export const perfLogDataSet1 = {
       type: 'APP_STARTUP',
       time: 8.864,
       metaData: {},
-      createdOn: 1586181307744,
+      createdOn: 1586181307744, // less than one month
       _id: '15e13a49-d581-4d8b-813a-037a85025e34'
     },
     {
       type: 'APP_STARTUP',
       time: 8.842,
       metaData: {},
-      createdOn: 1586182109061,
+      createdOn: 1586182109061, // less than one month
       _id: 'ad4701a1-daa1-44c1-9e1f-ecd6e551a354'
     },
     {
@@ -54,7 +54,7 @@ export const perfLogDataSet1 = {
         contentType: 'Collection',
         pkgVersion: '2'
       },
-      createdOn: 1586182196194,
+      createdOn: 1586182196194, // less than one month
       _id: '398483c4-d347-4fd8-99d2-77c5a1414881'
     },
     {
@@ -69,11 +69,12 @@ export const perfLogDataSet1 = {
           contentType: 'Collection',
           pkgVersion: '2'
         },
-        createdOn: 1586182196194,
+        createdOn: 1586182196194, // less than one month
         _id: '398483c4-d347-4fd8-99d2-77c5a1414886'
     }
   ]
 };
 
-// const mocKData = require('./perfLogger.spec.data').perfLogDataSet1.logs; // mock code should be removed
-// await this.dbSDK.bulkDocs(DB_NAME, mocKData); // mock code should be removed
+export const INITIAL_TRIGGER = 15 * 60 * 1000;
+export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+export const MONTH_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000;
