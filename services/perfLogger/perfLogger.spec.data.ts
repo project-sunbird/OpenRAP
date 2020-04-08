@@ -1,11 +1,20 @@
 export const perfLogDataSet1 = {
-  logs: [
+  currentDate: 1586262600000, // apr 7 2020
+  lastSyncDate: 1581078600000, // feb 7 20202
+  logs: [ // should be sorted based on createdOn 
     {
       type: 'APP_STARTUP',
       time: 8.762,
       metaData: {},
       createdOn: 1582867800000, // more than one month
       _id: '6b982d59-11b2-4047-ba58-f7e0bc6578ba'
+    },
+    {
+      type: 'APP_STARTUP',
+      time: 8.762,
+      metaData: {},
+      createdOn: 1581100200000, // more than one month
+      _id: '6d982d59-11b2-4047-ba58-f7e0bc6578ba'
     },
     {
       type: 'APP_STARTUP',
@@ -69,7 +78,7 @@ export const perfLogDataSet1 = {
           contentType: 'Collection',
           pkgVersion: '2'
         },
-        createdOn: 1586182196194, // less than one month
+        createdOn: 1586197799999, // less than one month
         _id: '398483c4-d347-4fd8-99d2-77c5a1414886'
     }
   ]

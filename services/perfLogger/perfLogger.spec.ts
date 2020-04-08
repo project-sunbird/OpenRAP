@@ -1,4 +1,5 @@
 import { PerfLogger } from './index';
+import * as _ from "lodash";
 import { perfLogDataSet1, INITIAL_TRIGGER, DAY_IN_MILLISECONDS, MONTH_IN_MILLISECONDS } from './perfLogger.spec.data';
 const sinon = require('sinon'), chai = require('chai'), spies = require('chai-spies');
 chai.use(spies);
@@ -7,22 +8,24 @@ const spy = chai.spy.sandbox(), expect = chai.expect;
 const mockDataBaseSDK = {
   data: [],
   bulkDocs: (db_name, data) => {
-    this.perf_log = data;
+    this.data = _.sortBy(data, ['createdOn']);
     return Promise.resolve();
   },
-  find : (db_name, query) => {
+  find: (db_name, query) => {
     const matchedRows = [];
-    for(let log of this.perf_log){
-      if(query.selector.createdOn['$gte'] >= log.createdOn && query.selector.createdOn['$lte'] <= log.createdOn){
+    for(let log of this.data){
+      // console.log('mockDataBaseSDK.find loop', query.selector.createdOn['$gte'], log.createdOn, query.selector.createdOn['$lte'], matchedRows.length);
+      if(query.selector.createdOn['$gte'] <= log.createdOn && query.selector.createdOn['$lte'] >= log.createdOn){
         matchedRows.push(log);
       }
       if(query.limit === matchedRows.length){
-        return Promise.resolve(matchedRows);
+        break;
       }
     }
+    return Promise.resolve({docs: matchedRows});
   }
 }
-describe('PerfLogger', async () => {
+describe.only('PerfLogger', async () => {
   let perfLogger;
   let clock;
   before(async () => {
@@ -46,4 +49,17 @@ describe('PerfLogger', async () => {
     expect(handleTimerEvent).to.have.been.called.twice;
     expect(handleTimerEvent).to.have.been.called.with(1);
   });
+  it(`should return asyncIterator that gives all logs within given time period without duplication or missing rows`, async () => {
+    await mockDataBaseSDK.bulkDocs('perf', perfLogDataSet1.logs);
+    const dataBaseSDKFindSyp = spy.on(perfLogger.dbSDK, 'find', mockDataBaseSDK.find.bind(mockDataBaseSDK));
+    const lastProcessedDate = perfLogger.getStartAndEndEpochTime(perfLogDataSet1.lastSyncDate);
+    const endDate = perfLogger.getStartAndEndEpochTime(perfLogDataSet1.currentDate);
+    const perfLogsIterator = perfLogger.getUnProcessedLogsIterator({startTime: lastProcessedDate.endTime + 1, endTime: endDate.startTime - 1}, 2);
+    const logs = [];
+    for await (const log of perfLogsIterator) {
+      logs.push(log);
+    }
+    expect(logs).to.be.deep.equal(_.sortBy(perfLogDataSet1.logs, ['createdOn']));
+  });
+
 });
