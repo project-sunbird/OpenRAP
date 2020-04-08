@@ -1,6 +1,6 @@
 import { PerfLogger } from './index';
 import { perfLogDataSet1, INITIAL_TRIGGER, DAY_IN_MILLISECONDS, MONTH_IN_MILLISECONDS } from './perfLogger.spec.data';
-const sinon = require('sinon'), chai = require('chai'), pies = require('chai-spies');
+const sinon = require('sinon'), chai = require('chai'), spies = require('chai-spies');
 chai.use(spies);
 const spy = chai.spy.sandbox(), expect = chai.expect;
 
@@ -22,7 +22,7 @@ const mockDataBaseSDK = {
     }
   }
 }
-describe.only('PerfLogger', async () => {
+describe('PerfLogger', async () => {
   let perfLogger;
   let clock;
   before(async () => {
