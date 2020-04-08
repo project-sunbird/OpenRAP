@@ -121,9 +121,9 @@ export class PerfLogger {
 
     private getStartAndEndEpochTime(dateInEpoch = Date.now()): {startTime: number, endTime: number} {
         const start = new Date(dateInEpoch);
-        start.setHours(0,0,0,0);
+        start.setUTCHours(0,0,0,0);
         const end = new Date(dateInEpoch);
-        end.setHours(23,59,59,999);
+        end.setUTCHours(23,59,59,999);
         return {
             startTime: start.getTime(),
             endTime: end.getTime()

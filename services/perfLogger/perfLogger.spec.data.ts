@@ -13,7 +13,7 @@ export const perfLogDataSet1 = {
       type: 'APP_STARTUP',
       time: 8.762,
       metaData: {},
-      createdOn: 1581100200000, // more than one month
+      createdOn: 1581120000000, // more than one month
       _id: '6d982d59-11b2-4047-ba58-f7e0bc6578ba'
     },
     {
