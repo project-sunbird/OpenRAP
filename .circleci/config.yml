@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/node:8.16
+      - image: sunbird/build:player
     working_directory: ~/project/
     steps:
       - checkout
