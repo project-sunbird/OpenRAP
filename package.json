@@ -4,7 +4,7 @@
   "description": "OpenRAP Software",
   "main": "dist/main.js",
   "scripts": {
-    "build": "rimraf dist && tsc && cpy package.json ./dist && cpy  ./db/ ./dist/db/",
+    "build": "rimraf dist && tsc && cpy package.json ./dist && cpy  ./db/ ./dist/db/ && gulp",
     "test": "rimraf test_data && mkdirp test_data && nyc --reporter=lcov --reporter=html --reporter=text mocha --exit -r ts-node/register **/**/*.spec.ts **/*.spec.ts *.spec.ts"
   },
   "nyc": {
@@ -49,7 +49,6 @@
     "lodash": "^4.17.11",
     "pouchdb": "^7.1.1",
     "pouchdb-find": "^7.1.1",
-    "sinon": "^9.0.1",
     "su-downloader3": "^1.0.8",
     "systeminformation": "^4.14.17",
     "typescript-ioc": "^3.0.4"
@@ -75,6 +74,7 @@
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "rimraf": "^2.6.3",
+    "sinon": "^9.0.1",
     "ts-node": "^8.1.0",
     "typescript": "^2.8.4",
     "uuid": "^3.3.2"
