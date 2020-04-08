@@ -1,3 +1,5 @@
+const path = require('path');
+process.env.DATABASE_PATH = path.join(__dirname, '..','..', 'test_data');
 import { PerfLogger } from './index';
 import * as _ from "lodash";
 import { perfLogDataSet1, INITIAL_TRIGGER, DAY_IN_MILLISECONDS, MONTH_IN_MILLISECONDS } from './perfLogger.spec.data';
