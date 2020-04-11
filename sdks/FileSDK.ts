@@ -71,8 +71,9 @@ export default class FileSDK {
    * with other plugins are resolved it tries to find file from current directory to delete it
    * @returns Promise
    */
-  remove(file: string) {
-    return fse.remove(path.join(this.prefixPath, file));
+  remove(file: string, customPath?: string) {
+    const pathUrl = customPath ? customPath : this.prefixPath;
+    return fse.remove(path.join(pathUrl, file));
   }
 
   archiver(){
