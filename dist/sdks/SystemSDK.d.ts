@@ -37,5 +37,6 @@ export default class SystemSDK {
         availableMemory: number;
         totalHarddisk: number;
         availableHarddisk: number;
+        drives: any;
     }>;
 }
