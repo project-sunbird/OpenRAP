@@ -58,8 +58,8 @@ let ContainerAPI = class ContainerAPI {
         return new SettingSDK_1.default(pluginId);
     }
     // get file SDK by plugin
-    getFileSDKInstance(pluginId) {
-        return new FileSDK_1.default(pluginId);
+    getFileSDKInstance(pluginId, customPath) {
+        return new FileSDK_1.default(pluginId, customPath);
     }
     getDownloadSdkInstance() {
         return this.downloadSDK;

@@ -24,10 +24,10 @@ const archiver = require("archiver");
  *
  */
 class FileSDK {
-    constructor(pluginId) {
+    constructor(pluginId, customPath) {
         this.pluginId = pluginId;
         let fileBasePath = process.env.FILES_PATH || path.join(__dirname, "..", "..", "..", "..");
-        this.prefixPath = path.join(fileBasePath, this.pluginId);
+        this.prefixPath = customPath ? customPath : path.join(fileBasePath, this.pluginId);
     }
     /**
      * @param foldersPath
@@ -158,5 +158,16 @@ class FileSDK {
             return fse.readdir(this.getAbsPath(dirPath));
         }
     }
+    isDirectoryExists(dirPath) {
+        return new Promise((resolve, reject) => {
+            fs.stat(dirPath, (error, stats) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(stats.isDirectory());
+            });
+        });
+    }
+    ;
 }
 exports.default = FileSDK;

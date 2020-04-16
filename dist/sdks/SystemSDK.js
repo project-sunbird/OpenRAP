@@ -148,7 +148,8 @@ let SystemSDK = class SystemSDK {
                 totalMemory: 0,
                 availableMemory: 0,
                 totalHarddisk: 0,
-                availableHarddisk: 0
+                availableHarddisk: 0,
+                drives: undefined
             };
             deviceInfo.id = yield this.getDeviceId();
             let osInfo = yield si
@@ -194,10 +195,11 @@ let SystemSDK = class SystemSDK {
                         "*" +
                         graphics["displays"][0].currentResY;
             }
-            let hardDiskInfo = yield this.getHardDiskInfo();
+            const hardDiskInfo = yield this.getHardDiskInfo();
             deviceInfo.totalHarddisk = hardDiskInfo.totalHarddisk;
             deviceInfo.availableHarddisk = hardDiskInfo.availableHarddisk;
-            let memoryInfo = yield this.getMemoryInfo();
+            deviceInfo.drives = hardDiskInfo.fsSize;
+            const memoryInfo = yield this.getMemoryInfo();
             deviceInfo.totalMemory = memoryInfo.totalMemory;
             deviceInfo.availableMemory = memoryInfo.availableMemory;
             return deviceInfo;

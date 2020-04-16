@@ -22,7 +22,7 @@ declare class ContainerAPI {
     bootstrap(): Promise<void>;
     register(pluginId: string, pluginInfo: PluginConfig): Promise<void>;
     getSettingSDKInstance(pluginId: string): SettingSDK;
-    getFileSDKInstance(pluginId: string): FileSDK;
+    getFileSDKInstance(pluginId: string, customPath?: string): FileSDK;
     getDownloadSdkInstance(): DownloadSDK;
     getNetworkStatus(url?: string): Promise<boolean>;
     getSystemSDKInstance(pluginId?: string): SystemSDK;

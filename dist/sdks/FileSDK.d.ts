@@ -6,7 +6,7 @@ import * as chokidar from "chokidar";
 export default class FileSDK {
     private pluginId;
     private prefixPath;
-    constructor(pluginId: string);
+    constructor(pluginId: string, customPath?: string);
     /**
      * @param foldersPath
      * This method creates the folders it adds the plugin id as prefix so that conflicts with folder path
@@ -47,4 +47,5 @@ export default class FileSDK {
     getAbsPath(Path: string): string;
     watch(paths: string[]): chokidar.FSWatcher;
     readdir(dirPath: string): Promise<string[]>;
+    isDirectoryExists(dirPath: string): Promise<any>;
 }
