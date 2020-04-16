@@ -18,11 +18,11 @@ export default class FileSDK {
   private pluginId: string;
   private prefixPath: string;
 
-  constructor(pluginId: string) {
+  constructor(pluginId: string, customPath?: string) {
     this.pluginId = pluginId;
     let fileBasePath =
       process.env.FILES_PATH || path.join(__dirname, "..", "..", "..", "..");
-    this.prefixPath = path.join(fileBasePath, this.pluginId);
+    this.prefixPath = customPath ? customPath : path.join(fileBasePath, this.pluginId);
   }
 
   /**
@@ -137,6 +137,7 @@ export default class FileSDK {
     //This is folder name taken from source filename and contents will be extracted to this folder name
     let destFolderName = path.join(this.prefixPath, destPath);
     let srcFilePath = path.join(this.prefixPath, filePath);
+
     if (extractToFolder) {
       destFolderName = path.join(
         destFolderName,
@@ -179,4 +180,15 @@ export default class FileSDK {
       return fse.readdir(this.getAbsPath(dirPath));
     }
   }
+
+  isDirectoryExists(dirPath: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      fs.stat(dirPath, (error, stats) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(stats.isDirectory());
+      });
+    });
+  };
 }
