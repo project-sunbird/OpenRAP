@@ -16,6 +16,8 @@ const LOG_QUERY_LIMIT = 1000;
 const DB_NAME = 'perf_log';
 const LAST_PERF_LOG_PROCEEDED_ON = 'LAST_PERF_LOG_PROCEEDED_ON';
 const DEFAULT_LAST_SYNC_TIME = 1585282913052; // used when setting sdk return no data
+const system = "DesktopApp";
+const subsystem = "DesktopApp";
 
 @Singleton
 @ClassLogger()
@@ -23,6 +25,7 @@ export class PerfLogger {
 
     @Inject private dbSDK: DataBaseSDK;
     @Inject private settingSDK: SettingSDK;
+    @Inject private telemetryInstance: TelemetryInstance;
 
     public initialize(initial_trigger = INITIAL_TRIGGER, scheduled_trigger =  DAY_IN_MILLISECONDS){
         timer(initial_trigger, scheduled_trigger).subscribe(this.handleTimerEvent.bind(this)); // triggers aggregate job initial after initial_trigger and every 24 hours after initial trigger
@@ -92,7 +95,56 @@ export class PerfLogger {
         if(_.isEmpty(aggregatedLog)) {
             return;
         }
-        // TODO: aggregate logs based on type and log metric event
+        const metrics = [];
+        _.forIn(aggregatedLog, (value, key) => {
+            const metricKey = _.upperFirst(_.camelCase(key));
+            const metricsRaw = this.findMinMaxAvg(value.map(ele => ele.time));
+            metrics.push({
+                metric: `min${metricKey}Time`,
+                value: metricsRaw.min
+            })
+            metrics.push({
+                metric: `max${metricKey}Time`,
+                value: metricsRaw.max
+            })
+            metrics.push({
+                metric: `avg${metricKey}Time`,
+                value: metricsRaw.avg
+            })
+            metrics.push({
+                metric: `total${metricKey}S`,
+                value: value.length
+            })
+        })
+        metrics.push({
+            metric: 'createdDate',
+            value: currentEndTime
+        })
+        const telemetryEvent = {
+            context: {
+              env: 'DesktopApp',
+            },
+            edata: {
+                system,
+                subsystem,
+                metrics
+            },
+        }
+        this.telemetryInstance.metrics(telemetryEvent);
+    }
+    findMinMaxAvg(arr = []){
+            let max = arr[0];
+            let min = arr[0];
+            let sum = 0;
+           arr.forEach((value) => {
+               if(value > max)
+                 max = value;
+               if(value < min)
+                 min = value;
+               sum +=value;
+           })
+           let avg = sum/arr.length;
+          return {max,min,avg};
     }
 
     private async updateLastSyncDate(currentEndTime){
