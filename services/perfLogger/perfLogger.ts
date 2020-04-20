@@ -20,7 +20,6 @@ const system = "DesktopApp";
 const subsystem = "DesktopApp";
 
 @Singleton
-@ClassLogger()
 export class PerfLogger {
 
     @Inject private dbSDK: DataBaseSDK;
