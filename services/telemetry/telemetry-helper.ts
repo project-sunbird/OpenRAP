@@ -6,6 +6,7 @@ import {
   IStartEventInput,
   IImpressionEventInput,
   IInteractEventInput,
+  IMetricEventInput,
   IShareEventInput,
   IErrorEventInput,
   IEndEventInput,
@@ -117,7 +118,18 @@ export class TelemetryHelper {
       this.telemetryProvider.interact(eventData.edata, eventData.options);
     }
   }
-
+  /**
+   *
+   * Logs 'metrics' telemetry event
+   * @param {IInteractEventInput} interactEventInput
+   * @memberof TelemetryService
+   */
+  public metrics(interactEventInput: IMetricEventInput) {
+    if (this.isInitialized) {
+      const eventData: ITelemetryEvent = this.getEventData(interactEventInput);
+      this.telemetryProvider.metrics(eventData.edata, eventData.options);
+    }
+  }
   /**
    * Logs 'share' telemetry event
    *
