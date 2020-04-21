@@ -235,7 +235,6 @@ let PerfLogger = class PerfLogger {
         if (!logData.createdOn) {
             logData.createdOn = Date.now();
         }
-        console.log("==========perf_log added===========", logData);
         this.dbSDK.insertDoc(DB_NAME, logData).catch(error => {
             logger_1.logger.error("perf_log data insertion error", error);
         });
