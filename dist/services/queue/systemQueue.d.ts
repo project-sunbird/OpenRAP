@@ -2,6 +2,7 @@ import { ISystemQueue } from './IQueue';
 import { Observer } from "rxjs";
 export { ISystemQueue } from './IQueue';
 export declare class SystemQueue {
+    static taskCompleteEvent: string;
     private dbSDK;
     private telemetryInstance;
     private dbName;

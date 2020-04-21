@@ -24,6 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var SystemQueue_1;
 const typescript_ioc_1 = require("typescript-ioc");
 const _ = __importStar(require("lodash"));
 const typescript_ioc_2 = require("typescript-ioc");
@@ -34,13 +35,14 @@ const uuid = require("uuid");
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const telemetryInstance_1 = require("./../telemetry/telemetryInstance");
+const EventManager_1 = require("@project-sunbird/ext-framework-server/managers/EventManager");
 const DEFAULT_CONCURRENCY = {
     "openrap-sunbirded-plugin_IMPORT": 1,
     "openrap-sunbirded-plugin_DOWNLOAD": 1,
     "openrap-sunbirded-plugin_DELETE": 1,
     default: 1
 };
-let SystemQueue = class SystemQueue {
+let SystemQueue = SystemQueue_1 = class SystemQueue {
     constructor() {
         this.dbName = 'system_queue';
         this.registeredTasks = {};
@@ -252,7 +254,10 @@ let SystemQueue = class SystemQueue {
         const next = (data) => {
             queueCopy = data;
             const runningTaskRef = _.find(this.runningTasks, { _id: queueCopy._id });
-            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime) / 1000 : queueCopy.runTime;
+            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime) / 1000 : queueCopy.runTime;
+            if (runningTaskRef) {
+                runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+            }
             syncFun.next(queueCopy);
         };
         const error = (err) => {
@@ -261,7 +266,10 @@ let SystemQueue = class SystemQueue {
             queueCopy.failedReason = err.message;
             queueCopy.isActive = false;
             const runningTaskRef = _.find(this.runningTasks, { _id: queueCopy._id });
-            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime) / 1000 : queueCopy.runTime;
+            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime) / 1000 : queueCopy.runTime;
+            if (runningTaskRef) {
+                runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+            }
             syncFun.next(queueCopy);
             syncFun.complete();
         };
@@ -270,9 +278,13 @@ let SystemQueue = class SystemQueue {
             queueCopy.isActive = false;
             queueCopy.status = IQueue_1.SystemQueueStatus.completed;
             const runningTaskRef = _.find(this.runningTasks, { _id: queueCopy._id });
-            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime) / 1000 : queueCopy.runTime;
+            queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime) / 1000 : queueCopy.runTime;
+            if (runningTaskRef) {
+                runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+            }
             syncFun.next(queueCopy);
             syncFun.complete();
+            EventManager_1.EventManager.emit(SystemQueue_1.taskCompleteEvent, queueCopy); // used in perf log generation
         };
         return { next, error, complete };
     }
@@ -415,6 +427,7 @@ let SystemQueue = class SystemQueue {
         this.telemetryInstance.audit(telemetryEvent);
     }
 };
+SystemQueue.taskCompleteEvent = "SystemQueue:TASK_COMPLETE";
 __decorate([
     typescript_ioc_2.Inject,
     __metadata("design:type", DataBaseSDK_1.DataBaseSDK)
@@ -423,7 +436,7 @@ __decorate([
     typescript_ioc_2.Inject,
     __metadata("design:type", telemetryInstance_1.TelemetryInstance)
 ], SystemQueue.prototype, "telemetryInstance", void 0);
-SystemQueue = __decorate([
+SystemQueue = SystemQueue_1 = __decorate([
     typescript_ioc_1.Singleton
 ], SystemQueue);
 exports.SystemQueue = SystemQueue;

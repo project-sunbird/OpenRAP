@@ -235,7 +235,10 @@ export class SystemQueue {
     const next = (data: ISystemQueue) => {
       queueCopy = data;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
     };
     const error = (err: SystemQueueError) => {
@@ -244,7 +247,10 @@ export class SystemQueue {
       queueCopy.failedReason = err.message;
       queueCopy.isActive = false;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
       syncFun.complete();
     };
@@ -253,7 +259,10 @@ export class SystemQueue {
       queueCopy.isActive = false;
       queueCopy.status = SystemQueueStatus.completed;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
       syncFun.complete();
       EventManager.emit(SystemQueue.taskCompleteEvent, queueCopy); // used in perf log generation
