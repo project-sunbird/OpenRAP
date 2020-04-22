@@ -9,6 +9,7 @@ import { Subject, Observer, asyncScheduler, Observable } from "rxjs";
 import { throttleTime, mergeMap } from "rxjs/operators";
 import { TelemetryInstance } from './../telemetry/telemetryInstance';
 export { ISystemQueue } from './IQueue';
+import { EventManager } from "@project-sunbird/ext-framework-server/managers/EventManager";
 const DEFAULT_CONCURRENCY = {
   "openrap-sunbirded-plugin_IMPORT": 1,
   "openrap-sunbirded-plugin_DOWNLOAD": 1,
@@ -17,6 +18,7 @@ const DEFAULT_CONCURRENCY = {
 }
 @Singleton 
 export class SystemQueue {
+  public static taskCompleteEvent =  "SystemQueue:TASK_COMPLETE";
   @Inject private dbSDK: DataBaseSDK;
   @Inject private telemetryInstance: TelemetryInstance;
   private dbName = 'system_queue';
@@ -233,7 +235,10 @@ export class SystemQueue {
     const next = (data: ISystemQueue) => {
       queueCopy = data;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
     };
     const error = (err: SystemQueueError) => {
@@ -242,7 +247,10 @@ export class SystemQueue {
       queueCopy.failedReason = err.message;
       queueCopy.isActive = false;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
       syncFun.complete();
     };
@@ -251,9 +259,13 @@ export class SystemQueue {
       queueCopy.isActive = false;
       queueCopy.status = SystemQueueStatus.completed;
       const runningTaskRef = _.find(this.runningTasks, {_id: queueCopy._id});
-      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.startTime)/1000: queueCopy.runTime;
+      queueCopy.runTime = runningTaskRef ? queueCopy.runTime + (Date.now() - runningTaskRef.lastKnowProgressUpdatedTime)/1000: queueCopy.runTime;
+      if(runningTaskRef){
+        runningTaskRef.lastKnowProgressUpdatedTime = Date.now();
+      }
       syncFun.next(queueCopy);
       syncFun.complete();
+      EventManager.emit(SystemQueue.taskCompleteEvent, queueCopy); // used in perf log generation
     };
     return { next, error, complete };
   }

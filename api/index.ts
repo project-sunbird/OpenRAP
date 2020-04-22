@@ -19,6 +19,8 @@ import { SystemQueue, TaskExecuter, SystemQueueReq, SystemQueueQuery, ISystemQue
 export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq, SystemQueueStatus, NetworkQueueReq } from "./../services/queue";
 import { EventManager } from "@project-sunbird/ext-framework-server/managers/EventManager";
 import { INetworkQueueQuery } from './../services/queue/IQueue';
+import { PerfLogger, IPerfLog } from './../services/perfLogger';
+export * from './../services/perfLogger/IPerfLog'
 
 @Singleton
 class ContainerAPI {
@@ -28,10 +30,12 @@ class ContainerAPI {
   @Inject networkQueue: NetworkQueue
   @Inject downloadSDK: DownloadSDK
   @Inject deviceSDK: DeviceSDK
+  @Inject private perfLogger: PerfLogger;
   public async bootstrap() {
     await App.bootstrap();
     EventManager.subscribe("app:initialized", () => {
       this.systemQueue.initialize();
+      this.perfLogger.initialize();
     });
   }
 
@@ -52,6 +56,9 @@ class ContainerAPI {
   }
   public getDownloadSdkInstance(){
     return this.downloadSDK;
+  }
+  public getPerfLoggerInstance(): PerfLogger {
+    return this.perfLogger;
   }
   // get the Network SDK
 

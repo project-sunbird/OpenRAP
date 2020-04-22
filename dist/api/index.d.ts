@@ -12,6 +12,8 @@ import { DownloadSDK } from "./../sdks/DownloadSDK";
 import DeviceSDK from "./../sdks/DeviceSDK";
 import { SystemQueue, TaskExecuter, SystemQueueReq, SystemQueueQuery, ISystemQueue, NetworkQueue } from './../services/queue';
 export { ITaskExecuter, SystemQueueQuery, ISystemQueue, SystemQueueReq, SystemQueueStatus, NetworkQueueReq } from "./../services/queue";
+import { PerfLogger } from './../services/perfLogger';
+export * from './../services/perfLogger/IPerfLog';
 declare class ContainerAPI {
     userSDK: UserSDK;
     ticketSDK: TicketSDK;
@@ -19,11 +21,13 @@ declare class ContainerAPI {
     networkQueue: NetworkQueue;
     downloadSDK: DownloadSDK;
     deviceSDK: DeviceSDK;
+    private perfLogger;
     bootstrap(): Promise<void>;
     register(pluginId: string, pluginInfo: PluginConfig): Promise<void>;
     getSettingSDKInstance(pluginId: string): SettingSDK;
     getFileSDKInstance(pluginId: string, customPath?: string): FileSDK;
     getDownloadSdkInstance(): DownloadSDK;
+    getPerfLoggerInstance(): PerfLogger;
     getNetworkStatus(url?: string): Promise<boolean>;
     getSystemSDKInstance(pluginId?: string): SystemSDK;
     getTelemetrySDKInstance(): TelemetrySDK;

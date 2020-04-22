@@ -7,3 +7,4 @@ log
 coverage
 .nyc_output
 managers/DownloadManager/testplugindownload
+test_data

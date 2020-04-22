@@ -1,4 +1,4 @@
-import { IStartEventInput, IImpressionEventInput, IInteractEventInput, IShareEventInput, IErrorEventInput, IEndEventInput, ILogEventInput, ITelemetryContext, IFeedBackEventInput, IAuditEventInput, IInterruptEventInput, ISearchEventData } from "./ITelemetry";
+import { IStartEventInput, IImpressionEventInput, IInteractEventInput, IMetricEventInput, IShareEventInput, IErrorEventInput, IEndEventInput, ILogEventInput, ITelemetryContext, IFeedBackEventInput, IAuditEventInput, IInterruptEventInput, ISearchEventData } from "./ITelemetry";
 export declare class TelemetryHelper {
     /**
      *
@@ -59,6 +59,13 @@ export declare class TelemetryHelper {
      * @memberof TelemetryService
      */
     interact(interactEventInput: IInteractEventInput): void;
+    /**
+     *
+     * Logs 'metrics' telemetry event
+     * @param {IInteractEventInput} interactEventInput
+     * @memberof TelemetryService
+     */
+    metrics(interactEventInput: IMetricEventInput): void;
     /**
      * Logs 'share' telemetry event
      *

@@ -157,6 +157,19 @@ export interface IInteractEventInput {
   object?: IInteractEventObject;
   edata: IInteractEventEdata;
 }
+export interface IMetricEventInput {
+  context: {
+    env: string;
+    cdata?: Array<object>;
+  };
+  object?: IInteractEventObject;
+  edata: IMetricEventEdata;
+}
+export interface IMetricEventEdata {
+  system: string;
+  subsystem: string;
+  metrics: {metric: string, value: number}[]
+}
 export interface IInteractEventObject {
   id?: string;
   type?: string;

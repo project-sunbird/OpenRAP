@@ -80,6 +80,18 @@ class TelemetryHelper {
         }
     }
     /**
+     *
+     * Logs 'metrics' telemetry event
+     * @param {IInteractEventInput} interactEventInput
+     * @memberof TelemetryService
+     */
+    metrics(interactEventInput) {
+        if (this.isInitialized) {
+            const eventData = this.getEventData(interactEventInput);
+            this.telemetryProvider.metrics(eventData.edata, eventData.options);
+        }
+    }
+    /**
      * Logs 'share' telemetry event
      *
      * @param {IShareEventInput} shareEventInput
