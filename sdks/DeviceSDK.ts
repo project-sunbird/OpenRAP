@@ -59,7 +59,7 @@ export default class DeviceSDK {
             })
                 .toPromise()
                 .then(data => {
-                    logger.info(`device registred successfully ${data.status}`);
+                    logger.info(`device registered successfully ${data.status}`);
                     clearInterval(interval);
                     this.getToken(deviceId);
                 })

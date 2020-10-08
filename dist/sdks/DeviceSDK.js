@@ -79,7 +79,7 @@ let DeviceSDK = class DeviceSDK {
                 })
                     .toPromise()
                     .then(data => {
-                    logger_1.logger.info(`device registred successfully ${data.status}`);
+                    logger_1.logger.info(`device registered successfully ${data.status}`);
                     clearInterval(interval);
                     this.getToken(deviceId);
                 })

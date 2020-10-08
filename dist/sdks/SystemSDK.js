@@ -31,7 +31,6 @@ const typescript_ioc_1 = require("typescript-ioc");
 const GetMac = require("getmac");
 const crypto = require("crypto");
 const uuid = require("uuid");
-const logger_1 = require("@project-sunbird/logger");
 const os = __importStar(require("os"));
 const si = __importStar(require("systeminformation"));
 const _ = __importStar(require("lodash"));
@@ -43,7 +42,7 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.deviceId)
                 return Promise.resolve(this.deviceId);
-            const deviceInfo = yield this.settingSDK.get('deviceId').catch(err => logger_1.logger.error('While getting deviceId from settingSDK', err));
+            const deviceInfo = yield this.settingSDK.get('deviceId');
             if (deviceInfo && deviceInfo.did) {
                 this.deviceId = deviceInfo.did;
                 return Promise.resolve(deviceInfo.did);
@@ -74,9 +73,7 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             let totalHarddisk = 0;
             let availableHarddisk = 0;
-            let fsSize = yield si
-                .fsSize()
-                .catch(error => logger_1.logger.error(`while getting hard disk size`, error));
+            let fsSize = yield si.fsSize();
             if (fsSize) {
                 if (os.platform() === "win32") {
                     totalHarddisk = fsSize
@@ -100,30 +97,23 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             let totalMemory = 0;
             let availableMemory = 0;
-            try {
-                let memory = yield si.mem();
-                totalMemory = _.get(memory, "total") || 0;
-                availableMemory = _.get(memory, "free") || 0;
-            }
-            catch (error) {
-                logger_1.logger.error(`while getting memory size`, error);
-            }
+            let memory = yield si.mem();
+            totalMemory = _.get(memory, "total") || 0;
+            availableMemory = _.get(memory, "free") || 0;
             return { totalMemory, availableMemory };
         });
     }
     getCpuLoad() {
         return __awaiter(this, void 0, void 0, function* () {
             let currentLoad = yield si
-                .currentLoad()
-                .catch(err => logger_1.logger.error("while reading CPU Load ", err));
+                .currentLoad();
             return currentLoad;
         });
     }
     getNetworkInfo() {
         return __awaiter(this, void 0, void 0, function* () {
             let networkInfo = yield si
-                .networkInterfaces()
-                .catch(err => logger_1.logger.error("while reading Network info", err));
+                .networkInterfaces();
             return networkInfo;
         });
     }
@@ -153,9 +143,7 @@ let SystemSDK = class SystemSDK {
                 drives: undefined
             };
             deviceInfo.id = yield this.getDeviceId();
-            let osInfo = yield si
-                .osInfo()
-                .catch(err => logger_1.logger.error("while reading os info ", err));
+            let osInfo = yield si.osInfo();
             if (osInfo) {
                 deviceInfo.platform = osInfo.platform;
                 deviceInfo.distro = osInfo.distro;
@@ -163,33 +151,25 @@ let SystemSDK = class SystemSDK {
                 deviceInfo.arch = osInfo.arch;
                 deviceInfo.servicePack = osInfo.servicepack;
             }
-            let cpu = yield si
-                .cpu()
-                .catch(err => logger_1.logger.error("while reading cpu info ", err));
+            let cpu = yield si.cpu();
             if (cpu) {
                 deviceInfo.cores = cpu.cores;
                 deviceInfo.cpuManufacturer = cpu.manufacturer;
                 deviceInfo.cpuBrand = cpu.brand;
                 deviceInfo.cpuSpeed = cpu.speed;
             }
-            let currentLoad = yield si
-                .currentLoad()
-                .catch(err => logger_1.logger.error("while reading current load ", err));
+            let currentLoad = yield si.currentLoad();
             if (currentLoad) {
                 deviceInfo.cpuLoad = currentLoad.currentload;
             }
             deviceInfo.systemTime = si.time()
                 ? parseInt(si.time()["current"])
                 : Date.now();
-            let battery = yield si
-                .battery()
-                .catch(err => logger_1.logger.error("while reading battery info", err));
+            let battery = yield si.battery();
             if (battery) {
                 deviceInfo.hasBattery = battery.hasbattery;
             }
-            let graphics = yield si
-                .graphics()
-                .catch(err => logger_1.logger.error("while reading graphics info", err));
+            let graphics = yield si.graphics();
             if (!_.isEmpty(graphics["displays"][0])) {
                 deviceInfo.displayResolution =
                     graphics["displays"][0].currentResX +

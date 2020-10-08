@@ -8,14 +8,14 @@ export default class SystemSDK {
     getHardDiskInfo(): Promise<{
         totalHarddisk: number;
         availableHarddisk: number;
-        fsSize: void | si.Systeminformation.FsSizeData[];
+        fsSize: si.Systeminformation.FsSizeData[];
     }>;
     getMemoryInfo(): Promise<{
         totalMemory: number;
         availableMemory: number;
     }>;
-    getCpuLoad(): Promise<void | si.Systeminformation.CurrentLoadData>;
-    getNetworkInfo(): Promise<void | si.Systeminformation.NetworkInterfacesData[]>;
+    getCpuLoad(): Promise<si.Systeminformation.CurrentLoadData>;
+    getNetworkInfo(): Promise<si.Systeminformation.NetworkInterfacesData[]>;
     getDeviceInfo(): Promise<{
         id: string;
         platform: string;
