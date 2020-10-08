@@ -79,12 +79,10 @@ export default class SystemSDK {
     let totalMemory = 0;
     let availableMemory = 0;
     try {
-      throw new Error('vivek.........');
       let memory = await si.mem();
       totalMemory = _.get(memory, "total") || 0;
       availableMemory = _.get(memory, "free") || 0;
-    } 
-    catch (error) {
+    } catch (error) {
       logger.error(`while getting memory size`, error);
     }
     return { totalMemory, availableMemory };
