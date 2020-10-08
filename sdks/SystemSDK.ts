@@ -23,7 +23,7 @@ export default class SystemSDK {
 
   async getDeviceId() {
     if (this.deviceId) return Promise.resolve(this.deviceId);
-    const  deviceInfo: any = await this.settingSDK.get('deviceId');
+    const  deviceInfo: any = await this.settingSDK.get('deviceId').catch(err => logger.error('While getting deviceId from settingSDK', err));
     if (deviceInfo && deviceInfo.did) {
       this.deviceId = deviceInfo.did
       return Promise.resolve(deviceInfo.did)
