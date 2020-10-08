@@ -101,7 +101,6 @@ let SystemSDK = class SystemSDK {
             let totalMemory = 0;
             let availableMemory = 0;
             try {
-                throw new Error('vivek.........');
                 let memory = yield si.mem();
                 totalMemory = _.get(memory, "total") || 0;
                 availableMemory = _.get(memory, "free") || 0;
