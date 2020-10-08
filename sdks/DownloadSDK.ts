@@ -10,6 +10,12 @@ const SuDSchedulerOptions = {
     timeout: 60000
   }
 };
+import { ClassLogger } from '@project-sunbird/logger/decorator';
+
+@ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})
 @Singleton
 export class DownloadSDK {
 

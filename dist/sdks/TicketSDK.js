@@ -36,6 +36,7 @@ const NetworkSDK_1 = __importDefault(require("./NetworkSDK"));
 const DeviceSDK_1 = __importDefault(require("./DeviceSDK"));
 const services_1 = require("@project-sunbird/ext-framework-server/services");
 const FormData = require('form-data');
+const decorator_1 = require("@project-sunbird/logger/decorator");
 let TicketSDK = class TicketSDK {
     constructor() { }
     createTicket(ticketReq) {
@@ -111,6 +112,10 @@ __decorate([
     __metadata("design:type", DeviceSDK_1.default)
 ], TicketSDK.prototype, "deviceSDK", void 0);
 TicketSDK = __decorate([
+    decorator_1.ClassLogger({
+        logLevel: "debug",
+        logTime: true
+    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [])
 ], TicketSDK);

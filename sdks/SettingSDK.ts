@@ -1,6 +1,7 @@
 import { DataBaseSDK } from "./DataBaseSDK";
 import { hash } from "./../utils";
 import { Inject } from "typescript-ioc";
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
 /**
  * @author Harish Kumar Gangula <harishg@ilimi.in>
@@ -8,6 +9,10 @@ import { Inject } from "typescript-ioc";
 
 let dbName = "settings";
 
+@ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})
 export default class SettingSDK {
   @Inject
   private dbSDK: DataBaseSDK;

@@ -7,7 +7,12 @@ import NetworkSDK from "./NetworkSDK";
 import DeviceSDK from './DeviceSDK';
 import { HTTPService } from "@project-sunbird/ext-framework-server/services";
 const FormData = require('form-data');
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+@ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})
 @Singleton
 export class TicketSDK {
 

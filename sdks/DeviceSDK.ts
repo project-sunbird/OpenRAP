@@ -8,7 +8,12 @@ import uuid = require("uuid");
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import { DataBaseSDK } from "./DataBaseSDK";
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+@ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})
 @Singleton
 export default class DeviceSDK {
     private settingSDK = new SettingSDK('openrap-sunbirded-plugin');

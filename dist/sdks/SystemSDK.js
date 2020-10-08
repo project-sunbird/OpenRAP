@@ -36,6 +36,7 @@ const os = __importStar(require("os"));
 const si = __importStar(require("systeminformation"));
 const _ = __importStar(require("lodash"));
 const SettingSDK_1 = __importDefault(require("./SettingSDK"));
+const decorator_1 = require("@project-sunbird/logger/decorator");
 let SystemSDK = class SystemSDK {
     constructor(pluginId) { }
     getDeviceId() {
@@ -100,6 +101,7 @@ let SystemSDK = class SystemSDK {
             let totalMemory = 0;
             let availableMemory = 0;
             try {
+                throw new Error('vivek.........');
                 let memory = yield si.mem();
                 totalMemory = _.get(memory, "total") || 0;
                 availableMemory = _.get(memory, "free") || 0;
@@ -211,6 +213,10 @@ __decorate([
     __metadata("design:type", SettingSDK_1.default)
 ], SystemSDK.prototype, "settingSDK", void 0);
 SystemSDK = __decorate([
+    decorator_1.ClassLogger({
+        logLevel: "debug",
+        logTime: true
+    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [String])
 ], SystemSDK);

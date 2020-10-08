@@ -17,6 +17,7 @@ const SuDSchedulerOptions = {
         timeout: 60000
     }
 };
+const decorator_1 = require("@project-sunbird/logger/decorator");
 let DownloadSDK = class DownloadSDK {
     constructor() {
         this.suDScheduler = new SuDScheduler(SuDSchedulerOptions);
@@ -34,6 +35,10 @@ let DownloadSDK = class DownloadSDK {
     ;
 };
 DownloadSDK = __decorate([
+    decorator_1.ClassLogger({
+        logLevel: "debug",
+        logTime: true
+    }),
     typescript_ioc_1.Singleton
 ], DownloadSDK);
 exports.DownloadSDK = DownloadSDK;

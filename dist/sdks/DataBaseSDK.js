@@ -31,6 +31,7 @@ const typescript_ioc_1 = require("typescript-ioc");
 const PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 const path = __importStar(require("path"));
+const decorator_1 = require("@project-sunbird/logger/decorator");
 let DataBaseSDK = class DataBaseSDK {
     constructor() {
         this.dbPath = process.env.DATABASE_PATH;
@@ -132,6 +133,10 @@ let DataBaseSDK = class DataBaseSDK {
     }
 };
 DataBaseSDK = __decorate([
+    decorator_1.ClassLogger({
+        logLevel: "debug",
+        logTime: true
+    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [])
 ], DataBaseSDK);
