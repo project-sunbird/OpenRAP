@@ -31,6 +31,7 @@ const typescript_ioc_1 = require("typescript-ioc");
 const GetMac = require("getmac");
 const crypto = require("crypto");
 const uuid = require("uuid");
+const logger_1 = require("@project-sunbird/logger");
 const os = __importStar(require("os"));
 const si = __importStar(require("systeminformation"));
 const _ = __importStar(require("lodash"));
@@ -42,7 +43,7 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.deviceId)
                 return Promise.resolve(this.deviceId);
-            const deviceInfo = yield this.settingSDK.get('deviceId');
+            const deviceInfo = yield this.settingSDK.get('deviceId').catch(err => logger_1.logger.error('While getting deviceId from settingSDK', err));
             if (deviceInfo && deviceInfo.did) {
                 this.deviceId = deviceInfo.did;
                 return Promise.resolve(deviceInfo.did);
