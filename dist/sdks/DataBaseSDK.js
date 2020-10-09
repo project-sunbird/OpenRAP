@@ -31,6 +31,10 @@ const typescript_ioc_1 = require("typescript-ioc");
 const PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 const path = __importStar(require("path"));
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let DataBaseSDK = class DataBaseSDK {
     constructor() {
         this.dbPath = process.env.DATABASE_PATH;
