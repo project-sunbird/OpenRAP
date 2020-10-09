@@ -9,10 +9,10 @@ import { HTTPService } from "@project-sunbird/ext-framework-server/services";
 const FormData = require('form-data');
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 @Singleton
 export class TicketSDK {
 

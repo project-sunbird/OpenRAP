@@ -22,7 +22,10 @@ const DataBaseSDK_1 = require("./../../sdks/DataBaseSDK");
 const _ = __importStar(require("lodash"));
 const uuid = require("uuid");
 const logger_1 = require("@project-sunbird/logger");
-const decorator_1 = require("@project-sunbird/logger/decorator");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let TelemetryInstance = class TelemetryInstance extends telemetryService_1.TelemetryService {
     constructor() {
         super();
@@ -70,10 +73,6 @@ __decorate([
     __metadata("design:type", DataBaseSDK_1.DataBaseSDK)
 ], TelemetryInstance.prototype, "databaseSdk", void 0);
 TelemetryInstance = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [])
 ], TelemetryInstance);

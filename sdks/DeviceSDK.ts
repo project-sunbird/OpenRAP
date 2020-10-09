@@ -10,10 +10,10 @@ import jwt from "jsonwebtoken";
 import { DataBaseSDK } from "./DataBaseSDK";
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 @Singleton
 export default class DeviceSDK {
     private settingSDK = new SettingSDK('openrap-sunbirded-plugin');

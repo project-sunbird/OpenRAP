@@ -12,10 +12,10 @@ const SuDSchedulerOptions = {
 };
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 @Singleton
 export class DownloadSDK {
 

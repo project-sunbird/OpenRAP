@@ -1,13 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -28,8 +19,10 @@ const path = __importStar(require("path"));
 const decompress_zip_1 = __importDefault(require("decompress-zip"));
 const chokidar = __importStar(require("chokidar"));
 const archiver = require("archiver");
-const decorator_1 = require("@project-sunbird/logger/decorator");
-let FileSDK = 
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 /**
  * This SDK provides methods to handle file deleting , folder creation and deletion prefixed with pluginId
  *
@@ -180,17 +173,5 @@ class FileSDK {
         });
     }
     ;
-};
-FileSDK = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    })
-    /**
-     * This SDK provides methods to handle file deleting , folder creation and deletion prefixed with pluginId
-     *
-     */
-    ,
-    __metadata("design:paramtypes", [String, String])
-], FileSDK);
+}
 exports.default = FileSDK;

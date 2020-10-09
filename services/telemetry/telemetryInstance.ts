@@ -7,10 +7,10 @@ import uuid = require("uuid");
 import { logger } from "@project-sunbird/logger";
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 @Singleton
 export class TelemetryInstance extends TelemetryService {
   @Inject

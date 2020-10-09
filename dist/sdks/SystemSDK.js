@@ -74,7 +74,9 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             let totalHarddisk = 0;
             let availableHarddisk = 0;
-            let fsSize = yield si.fsSize();
+            let fsSize = yield si
+                .fsSize()
+                .catch(error => logger_1.logger.error(`while getting hard disk size`, error));
             if (fsSize) {
                 if (os.platform() === "win32") {
                     totalHarddisk = fsSize
@@ -98,23 +100,30 @@ let SystemSDK = class SystemSDK {
         return __awaiter(this, void 0, void 0, function* () {
             let totalMemory = 0;
             let availableMemory = 0;
-            let memory = yield si.mem();
-            totalMemory = _.get(memory, "total") || 0;
-            availableMemory = _.get(memory, "free") || 0;
+            try {
+                let memory = yield si.mem();
+                totalMemory = _.get(memory, "total") || 0;
+                availableMemory = _.get(memory, "free") || 0;
+            }
+            catch (error) {
+                logger_1.logger.error(`while getting memory size`, error);
+            }
             return { totalMemory, availableMemory };
         });
     }
     getCpuLoad() {
         return __awaiter(this, void 0, void 0, function* () {
             let currentLoad = yield si
-                .currentLoad();
+                .currentLoad()
+                .catch(err => logger_1.logger.error("while reading CPU Load ", err));
             return currentLoad;
         });
     }
     getNetworkInfo() {
         return __awaiter(this, void 0, void 0, function* () {
             let networkInfo = yield si
-                .networkInterfaces();
+                .networkInterfaces()
+                .catch(err => logger_1.logger.error("while reading Network info", err));
             return networkInfo;
         });
     }
@@ -144,7 +153,9 @@ let SystemSDK = class SystemSDK {
                 drives: undefined
             };
             deviceInfo.id = yield this.getDeviceId();
-            let osInfo = yield si.osInfo();
+            let osInfo = yield si
+                .osInfo()
+                .catch(err => logger_1.logger.error("while reading os info ", err));
             if (osInfo) {
                 deviceInfo.platform = osInfo.platform;
                 deviceInfo.distro = osInfo.distro;
@@ -152,25 +163,33 @@ let SystemSDK = class SystemSDK {
                 deviceInfo.arch = osInfo.arch;
                 deviceInfo.servicePack = osInfo.servicepack;
             }
-            let cpu = yield si.cpu();
+            let cpu = yield si
+                .cpu()
+                .catch(err => logger_1.logger.error("while reading cpu info ", err));
             if (cpu) {
                 deviceInfo.cores = cpu.cores;
                 deviceInfo.cpuManufacturer = cpu.manufacturer;
                 deviceInfo.cpuBrand = cpu.brand;
                 deviceInfo.cpuSpeed = cpu.speed;
             }
-            let currentLoad = yield si.currentLoad();
+            let currentLoad = yield si
+                .currentLoad()
+                .catch(err => logger_1.logger.error("while reading current load ", err));
             if (currentLoad) {
                 deviceInfo.cpuLoad = currentLoad.currentload;
             }
             deviceInfo.systemTime = si.time()
                 ? parseInt(si.time()["current"])
                 : Date.now();
-            let battery = yield si.battery();
+            let battery = yield si
+                .battery()
+                .catch(err => logger_1.logger.error("while reading battery info", err));
             if (battery) {
                 deviceInfo.hasBattery = battery.hasbattery;
             }
-            let graphics = yield si.graphics();
+            let graphics = yield si
+                .graphics()
+                .catch(err => logger_1.logger.error("while reading graphics info", err));
             if (!_.isEmpty(graphics["displays"][0])) {
                 deviceInfo.displayResolution =
                     graphics["displays"][0].currentResX +

@@ -19,7 +19,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("lodash"));
 const telemetry_helper_1 = require("./telemetry-helper");
 const typescript_ioc_1 = require("typescript-ioc");
-const decorator_1 = require("@project-sunbird/logger/decorator");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let TelemetryService = class TelemetryService extends telemetry_helper_1.TelemetryHelper {
     constructor() {
         super();
@@ -62,10 +65,6 @@ let TelemetryService = class TelemetryService extends telemetry_helper_1.Telemet
     }
 };
 TelemetryService = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [])
 ], TelemetryService);

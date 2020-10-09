@@ -37,8 +37,15 @@ const uuid = require("uuid");
 const axios_1 = __importDefault(require("axios"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const DataBaseSDK_1 = require("./DataBaseSDK");
-const decorator_1 = require("@project-sunbird/logger/decorator");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let DeviceSDK = class DeviceSDK {
+    /* @ClassLogger({
+      logLevel: "debug",
+      logTime: true
+    }) */
     constructor() {
         this.settingSDK = new SettingSDK_1.default('openrap-sunbirded-plugin');
     }
@@ -157,10 +164,6 @@ __decorate([
     __metadata("design:type", DataBaseSDK_1.DataBaseSDK)
 ], DeviceSDK.prototype, "databaseSdk", void 0);
 DeviceSDK = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
     typescript_ioc_1.Singleton
 ], DeviceSDK);
 exports.default = DeviceSDK;

@@ -34,7 +34,10 @@ const DataBaseSDK_1 = require("./DataBaseSDK");
 const v4_1 = __importDefault(require("uuid/v4"));
 const DEFAULT_USER_NAME = 'guest';
 const USER_DB = 'users';
-const decorator_1 = require("@project-sunbird/logger/decorator");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})*/
 let UserSDK = class UserSDK {
     constructor() { }
     read(name = DEFAULT_USER_NAME) {
@@ -74,7 +77,8 @@ let UserSDK = class UserSDK {
             user.createdOn = Date.now();
             user.updatedOn = Date.now();
             return this.dbSDK.insertDoc(USER_DB, user, user._id)
-                .then(data => ({ _id: data.id }));
+                .then(data => ({ _id: data.id }))
+                .catch(err => { throw this.dbSDK.handleError(err); });
         });
     }
     update(user) {
@@ -106,10 +110,6 @@ __decorate([
     __metadata("design:type", DataBaseSDK_1.DataBaseSDK)
 ], UserSDK.prototype, "dbSDK", void 0);
 UserSDK = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
     typescript_ioc_1.Singleton,
     __metadata("design:paramtypes", [])
 ], UserSDK);

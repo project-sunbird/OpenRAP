@@ -20,12 +20,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DataBaseSDK_1 = require("./DataBaseSDK");
 const utils_1 = require("./../utils");
 const typescript_ioc_1 = require("typescript-ioc");
-const decorator_1 = require("@project-sunbird/logger/decorator");
 /**
  * @author Harish Kumar Gangula <harishg@ilimi.in>
  */
 let dbName = "settings";
-let SettingSDK = class SettingSDK {
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
+class SettingSDK {
     constructor(pluginId) {
         this.pluginId = pluginId;
         /*
@@ -51,16 +54,9 @@ let SettingSDK = class SettingSDK {
             return Promise.resolve(setting);
         });
     }
-};
+}
 __decorate([
     typescript_ioc_1.Inject,
     __metadata("design:type", DataBaseSDK_1.DataBaseSDK)
 ], SettingSDK.prototype, "dbSDK", void 0);
-SettingSDK = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
-    __metadata("design:paramtypes", [String])
-], SettingSDK);
 exports.default = SettingSDK;

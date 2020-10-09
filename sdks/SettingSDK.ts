@@ -9,10 +9,10 @@ import { ClassLogger } from '@project-sunbird/logger/decorator';
 
 let dbName = "settings";
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 export default class SettingSDK {
   @Inject
   private dbSDK: DataBaseSDK;

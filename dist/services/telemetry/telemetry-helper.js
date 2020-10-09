@@ -1,13 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -22,8 +13,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("lodash"));
 const telemetrySDK = __importStar(require("@project-sunbird/telemetry-sdk"));
 const SystemSDK_1 = __importDefault(require("./../../sdks/SystemSDK"));
-const decorator_1 = require("@project-sunbird/logger/decorator");
-let TelemetryHelper = class TelemetryHelper {
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})*/
+class TelemetryHelper {
     /**
      * Creates an instance of TelemetryService.
      * @param {*} telemetryProvider
@@ -272,12 +266,5 @@ let TelemetryHelper = class TelemetryHelper {
         data.forEach((element, index) => (rollUp["l" + (index + 1)] = element));
         return rollUp;
     }
-};
-TelemetryHelper = __decorate([
-    decorator_1.ClassLogger({
-        logLevel: "debug",
-        logTime: true
-    }),
-    __metadata("design:paramtypes", [])
-], TelemetryHelper);
+}
 exports.TelemetryHelper = TelemetryHelper;

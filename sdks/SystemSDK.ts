@@ -53,7 +53,9 @@ export default class SystemSDK {
   async getHardDiskInfo() {
     let totalHarddisk = 0;
     let availableHarddisk = 0;
-    let fsSize = await si.fsSize();
+    let fsSize = await si
+      .fsSize()
+      .catch(error => logger.error(`while getting hard disk size`, error));
     if (fsSize) {
       if (os.platform() === "win32") {
         totalHarddisk = fsSize
@@ -76,20 +78,25 @@ export default class SystemSDK {
   async getMemoryInfo() {
     let totalMemory = 0;
     let availableMemory = 0;
-    let memory = await si.mem();
-    totalMemory = _.get(memory, "total") || 0;
-    availableMemory = _.get(memory, "free") || 0;
-
+    try {
+      let memory = await si.mem();
+      totalMemory = _.get(memory, "total") || 0;
+      availableMemory = _.get(memory, "free") || 0;
+    } catch (error) {
+      logger.error(`while getting memory size`, error);
+    }
     return { totalMemory, availableMemory };
   }
   async getCpuLoad(){
     let currentLoad = await si
     .currentLoad()
+    .catch(err => logger.error("while reading CPU Load ", err));
     return currentLoad;
   }
   async getNetworkInfo(){
     let networkInfo = await si
     .networkInterfaces()
+    .catch(err => logger.error("while reading Network info", err));
     return networkInfo;
   }
   async getDeviceInfo() {
@@ -118,7 +125,9 @@ export default class SystemSDK {
     };
 
     deviceInfo.id = await this.getDeviceId();
-    let osInfo = await si.osInfo();
+    let osInfo = await si
+      .osInfo()
+      .catch(err => logger.error("while reading os info ", err));
     if (osInfo) {
       deviceInfo.platform = osInfo.platform;
       deviceInfo.distro = osInfo.distro;
@@ -127,7 +136,9 @@ export default class SystemSDK {
       deviceInfo.servicePack = osInfo.servicepack;
     }
 
-    let cpu = await si.cpu();
+    let cpu = await si
+      .cpu()
+      .catch(err => logger.error("while reading cpu info ", err));
     if (cpu) {
       deviceInfo.cores = cpu.cores;
       deviceInfo.cpuManufacturer = cpu.manufacturer;
@@ -135,7 +146,9 @@ export default class SystemSDK {
       deviceInfo.cpuSpeed = cpu.speed;
     }
 
-    let currentLoad = await si.currentLoad();
+    let currentLoad = await si
+      .currentLoad()
+      .catch(err => logger.error("while reading current load ", err));
     if (currentLoad) {
       deviceInfo.cpuLoad = currentLoad.currentload;
     }
@@ -143,13 +156,17 @@ export default class SystemSDK {
       ? parseInt(si.time()["current"])
       : Date.now();
 
-    let battery = await si.battery();
+    let battery = await si
+      .battery()
+      .catch(err => logger.error("while reading battery info", err));
 
     if (battery) {
       deviceInfo.hasBattery = battery.hasbattery;
     }
 
-    let graphics = await si.graphics();
+    let graphics = await si
+      .graphics()
+      .catch(err => logger.error("while reading graphics info", err));
     if (!_.isEmpty(graphics["displays"][0])) {
       deviceInfo.displayResolution =
         graphics["displays"][0].currentResX +

@@ -10,10 +10,10 @@ import * as chokidar from "chokidar";
 const archiver = require("archiver");
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 /**
  * This SDK provides methods to handle file deleting , folder creation and deletion prefixed with pluginId
  *

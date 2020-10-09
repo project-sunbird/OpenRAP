@@ -23,10 +23,10 @@ import { PerfLogger, IPerfLog } from './../services/perfLogger';
 export * from './../services/perfLogger/IPerfLog'
 import { ClassLogger } from '@project-sunbird/logger/decorator';
 
-@ClassLogger({
+/* @ClassLogger({
   logLevel: "debug",
   logTime: true
-})
+}) */
 @Singleton
 class ContainerAPI {
   @Inject userSDK : UserSDK;
