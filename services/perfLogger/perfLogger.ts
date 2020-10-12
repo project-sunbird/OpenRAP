@@ -35,7 +35,7 @@ export class PerfLogger {
             await this.aggregateLogs();
             await this.archiveOldLogs();
         } catch (error) {
-            logger.error(`========> aggregateLogs failed for count - ${triggerCount} <========`, error);
+            logger.error(`aggregateLogs failed for count - ${triggerCount}`, error);
         }
     }
 
@@ -190,16 +190,20 @@ export class PerfLogger {
         });
     }
 
-    private async archiveOldLogs(){
+    private async archiveOldLogs() {
 
-        let endDate = this.getStartAndEndEpochTime().startTime - 1 * MONTH_IN_MILLISECONDS;
-        let archiveLogs = await this.getLogsFromDB({startTime: 0, endTime: endDate}, {fields: ['_id', '_rev']});
+        try {
+            let endDate = this.getStartAndEndEpochTime().startTime - 1 * MONTH_IN_MILLISECONDS;
+            let archiveLogs = await this.getLogsFromDB({ startTime: 0, endTime: endDate }, { fields: ['_id', '_rev'] });
 
-        if(!archiveLogs || !archiveLogs.length){
-            return;
+            if (!archiveLogs || !archiveLogs.length) {
+                return;
+            }
+            const toBeDeleted = archiveLogs.map((data: any) => ({ _id: data._id, _rev: data._rev, _deleted: true }));
+            await this.dbSDK.bulkDocs(DB_NAME, toBeDeleted);
+        } catch (error) {
+            logger.error("perf_log error while archiving old logs", error);
         }
-        const toBeDeleted = archiveLogs.map((data: any) => ({ _id: data._id, _rev: data._rev, _deleted: true }));
-        await this.dbSDK.bulkDocs(DB_NAME, toBeDeleted);
     }
 
 }
