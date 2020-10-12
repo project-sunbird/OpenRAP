@@ -21,7 +21,12 @@ import { EventManager } from "@project-sunbird/ext-framework-server/managers/Eve
 import { INetworkQueueQuery } from './../services/queue/IQueue';
 import { PerfLogger, IPerfLog } from './../services/perfLogger';
 export * from './../services/perfLogger/IPerfLog'
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 @Singleton
 class ContainerAPI {
   @Inject userSDK : UserSDK;

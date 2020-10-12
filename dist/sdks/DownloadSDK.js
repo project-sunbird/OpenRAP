@@ -17,7 +17,15 @@ const SuDSchedulerOptions = {
         timeout: 60000
     }
 };
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let DownloadSDK = class DownloadSDK {
+    /* @ClassLogger({
+      logLevel: "debug",
+      logTime: true
+    }) */
     constructor() {
         this.suDScheduler = new SuDScheduler(SuDSchedulerOptions);
     }

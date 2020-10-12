@@ -40,6 +40,10 @@ var queue_2 = require("./../services/queue");
 exports.SystemQueueStatus = queue_2.SystemQueueStatus;
 const EventManager_1 = require("@project-sunbird/ext-framework-server/managers/EventManager");
 const perfLogger_1 = require("./../services/perfLogger");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let ContainerAPI = class ContainerAPI {
     bootstrap() {
         return __awaiter(this, void 0, void 0, function* () {

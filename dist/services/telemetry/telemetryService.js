@@ -19,6 +19,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("lodash"));
 const telemetry_helper_1 = require("./telemetry-helper");
 const typescript_ioc_1 = require("typescript-ioc");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let TelemetryService = class TelemetryService extends telemetry_helper_1.TelemetryHelper {
     constructor() {
         super();

@@ -13,6 +13,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = __importStar(require("lodash"));
 const telemetrySDK = __importStar(require("@project-sunbird/telemetry-sdk"));
 const SystemSDK_1 = __importDefault(require("./../../sdks/SystemSDK"));
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})*/
 class TelemetryHelper {
     /**
      * Creates an instance of TelemetryService.

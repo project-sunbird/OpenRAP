@@ -8,12 +8,16 @@ import DecompressZip from "decompress-zip";
 import * as _ from "lodash";
 import * as chokidar from "chokidar";
 const archiver = require("archiver");
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 /**
  * This SDK provides methods to handle file deleting , folder creation and deletion prefixed with pluginId
  *
  */
-
 export default class FileSDK {
   private pluginId: string;
   private prefixPath: string;

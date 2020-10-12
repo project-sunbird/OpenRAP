@@ -37,7 +37,15 @@ const uuid = require("uuid");
 const axios_1 = __importDefault(require("axios"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const DataBaseSDK_1 = require("./DataBaseSDK");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let DeviceSDK = class DeviceSDK {
+    /* @ClassLogger({
+      logLevel: "debug",
+      logTime: true
+    }) */
     constructor() {
         this.settingSDK = new SettingSDK_1.default('openrap-sunbirded-plugin');
     }
@@ -78,7 +86,7 @@ let DeviceSDK = class DeviceSDK {
                 })
                     .toPromise()
                     .then(data => {
-                    logger_1.logger.info(`device registred successfully ${data.status}`);
+                    logger_1.logger.info(`device registered successfully ${data.status}`);
                     clearInterval(interval);
                     this.getToken(deviceId);
                 })
@@ -136,7 +144,6 @@ let DeviceSDK = class DeviceSDK {
                     }
                     catch (err) {
                         logger_1.logger.error(`Error while registering the device status ${_.get(err, 'response.status')} data ${_.get(err, 'response.data')}`);
-                        logger_1.logger.info("Resolving error with invalid api key");
                         return Promise.resolve(this.apiKey);
                     }
                 }

@@ -7,7 +7,12 @@ import { IUser, IFramework } from "./../interfaces";
 import uuid from "uuid/v4";
 const DEFAULT_USER_NAME = 'guest';
 const USER_DB = 'users';
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})*/
 @Singleton
 export class UserSDK {
 
@@ -50,7 +55,8 @@ export class UserSDK {
     user.createdOn = Date.now();
     user.updatedOn = Date.now();
     return this.dbSDK.insertDoc(USER_DB, user, user._id)
-    .then(data => ({_id: data.id}));
+    .then(data => ({_id: data.id}))
+    .catch(err => { throw this.dbSDK.handleError(err); });
   }
 
   public async update(user: IUserUpdateReq): Promise<{_id: string} | UserSDKError>{

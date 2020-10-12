@@ -34,6 +34,10 @@ const DataBaseSDK_1 = require("./DataBaseSDK");
 const v4_1 = __importDefault(require("uuid/v4"));
 const DEFAULT_USER_NAME = 'guest';
 const USER_DB = 'users';
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+})*/
 let UserSDK = class UserSDK {
     constructor() { }
     read(name = DEFAULT_USER_NAME) {
@@ -73,7 +77,8 @@ let UserSDK = class UserSDK {
             user.createdOn = Date.now();
             user.updatedOn = Date.now();
             return this.dbSDK.insertDoc(USER_DB, user, user._id)
-                .then(data => ({ _id: data.id }));
+                .then(data => ({ _id: data.id }))
+                .catch(err => { throw this.dbSDK.handleError(err); });
         });
     }
     update(user) {

@@ -8,7 +8,12 @@ import uuid = require("uuid");
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import { DataBaseSDK } from "./DataBaseSDK";
+import { ClassLogger } from '@project-sunbird/logger/decorator';
 
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 @Singleton
 export default class DeviceSDK {
     private settingSDK = new SettingSDK('openrap-sunbirded-plugin');
@@ -54,7 +59,7 @@ export default class DeviceSDK {
             })
                 .toPromise()
                 .then(data => {
-                    logger.info(`device registred successfully ${data.status}`);
+                    logger.info(`device registered successfully ${data.status}`);
                     clearInterval(interval);
                     this.getToken(deviceId);
                 })
@@ -119,7 +124,6 @@ export default class DeviceSDK {
                     logger.error(
                         `Error while registering the device status ${_.get(err, 'response.status')} data ${_.get(err, 'response.data')}`
                     );
-                    logger.info("Resolving error with invalid api key");
                     return Promise.resolve(this.apiKey);
                 }
             } else {

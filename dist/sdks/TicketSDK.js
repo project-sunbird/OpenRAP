@@ -36,6 +36,10 @@ const NetworkSDK_1 = __importDefault(require("./NetworkSDK"));
 const DeviceSDK_1 = __importDefault(require("./DeviceSDK"));
 const services_1 = require("@project-sunbird/ext-framework-server/services");
 const FormData = require('form-data');
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 let TicketSDK = class TicketSDK {
     constructor() { }
     createTicket(ticketReq) {

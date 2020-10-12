@@ -19,6 +19,10 @@ const path = __importStar(require("path"));
 const decompress_zip_1 = __importDefault(require("decompress-zip"));
 const chokidar = __importStar(require("chokidar"));
 const archiver = require("archiver");
+/* @ClassLogger({
+  logLevel: "debug",
+  logTime: true
+}) */
 /**
  * This SDK provides methods to handle file deleting , folder creation and deletion prefixed with pluginId
  *
