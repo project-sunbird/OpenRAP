@@ -20,6 +20,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DataBaseSDK_1 = require("./DataBaseSDK");
 const utils_1 = require("./../utils");
 const typescript_ioc_1 = require("typescript-ioc");
+const logger_1 = require("@project-sunbird/logger");
 /**
  * @author Harish Kumar Gangula <harishg@ilimi.in>
  */
@@ -38,7 +39,9 @@ class SettingSDK {
          */
         this.put = (key, value) => __awaiter(this, void 0, void 0, function* () {
             let keyName = this.pluginId ? `${utils_1.hash(this.pluginId)}_${key}` : key;
-            yield this.dbSDK.upsertDoc(dbName, keyName, value);
+            yield this.dbSDK.upsertDoc(dbName, keyName, value).catch(err => {
+                logger_1.logger.error("Error while inserting the key to the  database", err);
+            });
             return true;
         });
         /*

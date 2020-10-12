@@ -1,5 +1,6 @@
 import { DataBaseSDK } from "./DataBaseSDK";
 import { PluginConfig } from "./../interfaces";
+import { logger } from "@project-sunbird/logger";
 import * as _ from "lodash";
 /**
  * @author Harish Kumar Gangula <harishg@ilimi.in>
@@ -15,7 +16,9 @@ export const register = async (
   pluginConfig: object
 ): Promise<boolean> => {
   let dbSDK = new DataBaseSDK();
-  await dbSDK.upsertDoc(databaseName, pluginId, pluginConfig);
+  await dbSDK.upsertDoc(databaseName, pluginId, pluginConfig).catch(err => {
+    logger.error("while inserting the plugin to the database", err);
+});
   return true;
 };
 

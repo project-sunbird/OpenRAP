@@ -16,6 +16,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DataBaseSDK_1 = require("./DataBaseSDK");
+const logger_1 = require("@project-sunbird/logger");
 const _ = __importStar(require("lodash"));
 /**
  * @author Harish Kumar Gangula <harishg@ilimi.in>
@@ -26,7 +27,9 @@ const _ = __importStar(require("lodash"));
 let databaseName = "plugin_registry";
 exports.register = (pluginId, pluginConfig) => __awaiter(this, void 0, void 0, function* () {
     let dbSDK = new DataBaseSDK_1.DataBaseSDK();
-    yield dbSDK.upsertDoc(databaseName, pluginId, pluginConfig);
+    yield dbSDK.upsertDoc(databaseName, pluginId, pluginConfig).catch(err => {
+        logger_1.logger.error("while inserting the plugin to the database", err);
+    });
     return true;
 });
 /*

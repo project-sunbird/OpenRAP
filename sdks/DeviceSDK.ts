@@ -124,7 +124,6 @@ export default class DeviceSDK {
                     logger.error(
                         `Error while registering the device status ${_.get(err, 'response.status')} data ${_.get(err, 'response.data')}`
                     );
-                    logger.info("Resolving error with invalid api key");
                     return Promise.resolve(this.apiKey);
                 }
             } else {
