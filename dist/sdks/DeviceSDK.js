@@ -48,8 +48,8 @@ let DeviceSDK = class DeviceSDK {
     }) */
     constructor() {
         this.settingSDK = new SettingSDK_1.default('openrap-sunbirded-plugin');
-        this.v1_api_path = "/api/api-manager/v1/consumer/desktop_device/credential/register";
-        this.v2_api_path = "/api/api-manager/v2/consumer/desktop_device/credential/register";
+        this.deviceRegistryV1APIPath = "/api/api-manager/v1/consumer/desktop_device/credential/register";
+        this.deviceRegistryV2APIPath = "/api/api-manager/v2/consumer/desktop_device/credential/register";
     }
     initialize(config) {
         this.config = config;
@@ -141,12 +141,12 @@ let DeviceSDK = class DeviceSDK {
     getTokenFromFallBackURL(options, fallBackURL = '') {
         return __awaiter(this, void 0, void 0, function* () {
             logger_1.logger.info("Fetching API token from V1 api");
-            const apiPath = fallBackURL || this.v1_api_path;
+            const apiPath = fallBackURL || this.deviceRegistryV1APIPath;
             const { headers, body } = options;
             try {
                 let response = yield axios_1.default.post(process.env.APP_BASE_URL + apiPath, body, { headers: headers });
                 let apiKey = "";
-                if (apiPath === this.v1_api_path) {
+                if (apiPath === this.deviceRegistryV1APIPath) {
                     let key = _.get(response, "data.result.key");
                     let secret = _.get(response, "data.result.secret");
                     apiKey = jsonwebtoken_1.default.sign({ iss: key }, secret, { algorithm: "HS256" });
@@ -176,7 +176,7 @@ let DeviceSDK = class DeviceSDK {
             try {
                 logger_1.logger.info("Fetching API token from V2 api");
                 const { headers, body } = options;
-                let response = yield axios_1.default.post(process.env.APP_BASE_URL + this.v2_api_path, body, { headers: headers });
+                let response = yield axios_1.default.post(process.env.APP_BASE_URL + this.deviceRegistryV2APIPath, body, { headers: headers });
                 let apiKey = _.get(response, "data.result.token");
                 if (!apiKey) {
                     logger_1.logger.info(`Token is not avialabe in V2: ${apiKey}`);
@@ -195,9 +195,9 @@ let DeviceSDK = class DeviceSDK {
                 logger_1.logger.error(`Error while fetching V2 auth token with response code ${err.response.status} ||  ${err}`);
                 if (err && err.response && err.response.status === 447) {
                     const responseHeaders = err.response.headers;
-                    const fallBackUrl = responseHeaders ? responseHeaders['location'] : this.v1_api_path;
+                    const fallBackUrl = responseHeaders ? responseHeaders['location'] : this.deviceRegistryV1APIPath;
                     logger_1.logger.debug(`Fetching AUTH TOKEN from fallback url ${fallBackUrl}`);
-                    yield this.getTokenFromFallBackURL(options, fallBackUrl || this.v1_api_path);
+                    yield this.getTokenFromFallBackURL(options, fallBackUrl || this.deviceRegistryV1APIPath);
                 }
                 else {
                     yield this.getTokenFromFallBackURL(options);

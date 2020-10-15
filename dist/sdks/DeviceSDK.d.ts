@@ -4,8 +4,8 @@ export default class DeviceSDK {
     private databaseSdk;
     private config;
     private apiKey;
-    private v1_api_path;
-    private v2_api_path;
+    private deviceRegistryV1APIPath;
+    private deviceRegistryV2APIPath;
     initialize(config: IConfig): void;
     register(): Promise<void>;
     getToken(deviceId?: string): Promise<string>;

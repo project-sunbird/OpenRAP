@@ -21,8 +21,8 @@ export default class DeviceSDK {
     @Inject private databaseSdk: DataBaseSDK;
     private config: IConfig;
     private apiKey: string;
-    private v1_api_path = "/api/api-manager/v1/consumer/desktop_device/credential/register";
-    private v2_api_path = "/api/api-manager/v2/consumer/desktop_device/credential/register";
+    private deviceRegistryV1APIPath = "/api/api-manager/v1/consumer/desktop_device/credential/register";
+    private deviceRegistryV2APIPath = "/api/api-manager/v2/consumer/desktop_device/credential/register";
 
     initialize(config: IConfig) {
         this.config = config;
@@ -114,7 +114,7 @@ export default class DeviceSDK {
 
     async getTokenFromFallBackURL(options, fallBackURL = '') {
         logger.info("Fetching API token from V1 api");
-        const apiPath = fallBackURL || this.v1_api_path;
+        const apiPath = fallBackURL || this.deviceRegistryV1APIPath;
         const {headers, body} = options;
         try {
             let response = await axios.post(
@@ -123,7 +123,7 @@ export default class DeviceSDK {
                 { headers: headers }
             );
             let apiKey = "";
-            if(apiPath === this.v1_api_path) {
+            if(apiPath === this.deviceRegistryV1APIPath) {
                 let key = _.get(response, "data.result.key");
                 let secret = _.get(response, "data.result.secret");
                 apiKey = jwt.sign({ iss: key }, secret, { algorithm: "HS256" });
@@ -153,7 +153,7 @@ export default class DeviceSDK {
             logger.info("Fetching API token from V2 api");
             const {headers, body} = options;
             let response = await axios.post(
-                process.env.APP_BASE_URL+this.v2_api_path,
+                process.env.APP_BASE_URL+this.deviceRegistryV2APIPath,
                 body,
                 { headers: headers }
             );
@@ -174,9 +174,9 @@ export default class DeviceSDK {
             logger.error(`Error while fetching V2 auth token with response code ${err.response.status} ||  ${err}`);
             if (err && err.response && err.response.status === 447) {
                 const responseHeaders = err.response.headers;
-                const fallBackUrl = responseHeaders ? responseHeaders['location'] : this.v1_api_path;
+                const fallBackUrl = responseHeaders ? responseHeaders['location'] : this.deviceRegistryV1APIPath;
                 logger.debug(`Fetching AUTH TOKEN from fallback url ${fallBackUrl}`);
-                await this.getTokenFromFallBackURL(options, fallBackUrl || this.v1_api_path);
+                await this.getTokenFromFallBackURL(options, fallBackUrl || this.deviceRegistryV1APIPath);
             } else {
                 await this.getTokenFromFallBackURL(options);
             }
