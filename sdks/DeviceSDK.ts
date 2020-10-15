@@ -21,6 +21,8 @@ export default class DeviceSDK {
     @Inject private databaseSdk: DataBaseSDK;
     private config: IConfig;
     private apiKey: string;
+    private deviceRegistryV1APIPath = "/api/api-manager/v1/consumer/desktop_device/credential/register";
+    private deviceRegistryV2APIPath = "/api/api-manager/v2/consumer/desktop_device/credential/register";
 
     initialize(config: IConfig) {
         this.config = config;
@@ -89,46 +91,96 @@ export default class DeviceSDK {
         } catch (error) {
             // Try to get it from API, set in local and return
             if (_.get(this.config, 'key') && did) {
-                let headers = {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${_.get(this.config, 'key')}`
-                };
-                let body = {
-                    id: "api.device.register",
-                    ver: "1.0",
-                    ts: Date.now(),
-                    request: {
-                        key: did
+                const options = { 
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${_.get(this.config, 'key')}`
+                    },
+                    body: {
+                        id: "api.device.register",
+                        ver: "1.0",
+                        ts: Date.now(),
+                        request: {
+                            key: did
+                        }
                     }
-                };
-                try {
-                    let response = await axios
-                        .post(
-                            process.env.APP_BASE_URL +
-                            "/api/api-manager/v1/consumer/desktop_device/credential/register",
-                            body,
-                            { headers: headers }
-                        );
-                    let key = _.get(response, "data.result.key");
-                    let secret = _.get(response, "data.result.secret");
-                    let apiKey = jwt.sign({ iss: key }, secret, { algorithm: "HS256" });
-                    await this.databaseSdk
-                        .upsertDoc("settings", "device_token", { api_key: apiKey })
-                        .catch(err => {
-                            logger.error("while inserting the api key to the  database", err);
-                        });
-                    this.apiKey = apiKey;
-                    logger.info("Received token from API");
-                    return Promise.resolve(this.apiKey);
-                } catch (err) {
-                    logger.error(
-                        `Error while registering the device status ${_.get(err, 'response.status')} data ${_.get(err, 'response.data')}`
-                    );
-                    return Promise.resolve(this.apiKey);
                 }
+                await this.getBearerToken(options);
             } else {
                 throw Error(`Token or deviceID missing to register device ${did}`);
             }
+        }
+    }
+
+    async getTokenFromFallBackURL(options, fallBackURL = '') {
+        logger.info("Fetching API token from V1 api");
+        const apiPath = fallBackURL || this.deviceRegistryV1APIPath;
+        const {headers, body} = options;
+        try {
+            let response = await axios.post(
+                process.env.APP_BASE_URL + apiPath,
+                body,
+                { headers: headers }
+            );
+            let apiKey = "";
+            if(apiPath === this.deviceRegistryV1APIPath) {
+                let key = _.get(response, "data.result.key");
+                let secret = _.get(response, "data.result.secret");
+                apiKey = jwt.sign({ iss: key }, secret, { algorithm: "HS256" });
+                logger.info("Received token from V1 API");
+            } else {
+                apiKey = _.get(response, "data.result.token");
+                logger.info(`Received token from Fallback URL: ${fallBackURL}`);
+            }
+            await this.databaseSdk
+            .upsertDoc("settings", "device_token", { api_key: apiKey })
+            .catch(err => {
+                logger.error("while inserting the api key to the  database", err);
+            });
+            this.apiKey = apiKey;
+            return this.apiKey;
+        } catch (err) {
+            logger.error(
+                `Error while registering the device status ${_.get(err, 'response.status')} data ${err}`
+            );
+            logger.info("Resolving error with invalid api key");
+            return Promise.resolve(this.apiKey);
+        }
+    }
+
+    async getBearerToken(options) {
+        try {
+            logger.info("Fetching API token from V2 api");
+            const {headers, body} = options;
+            let response = await axios.post(
+                process.env.APP_BASE_URL+this.deviceRegistryV2APIPath,
+                body,
+                { headers: headers }
+            );
+            let apiKey = _.get(response, "data.result.token");
+            if(!apiKey) {
+                logger.info(`Token is not avialabe in V2: ${apiKey}`);  
+                apiKey = await this.getTokenFromFallBackURL(options);
+            }
+            await this.databaseSdk
+            .upsertDoc("settings", "device_token", { api_key: apiKey })
+            .catch(err => {
+                logger.error("while inserting the api key to the  database", err);
+            });
+            this.apiKey = apiKey;
+            logger.info("Received token from V2 API");  
+            return Promise.resolve(this.apiKey);
+        }  catch (err) {
+            logger.error(`Error while fetching V2 auth token with response code ${err.response.status} ||  ${err}`);
+            if (err && err.response && err.response.status === 447) {
+                const responseHeaders = err.response.headers;
+                const fallBackUrl = responseHeaders ? responseHeaders['location'] : this.deviceRegistryV1APIPath;
+                logger.debug(`Fetching AUTH TOKEN from fallback url ${fallBackUrl}`);
+                await this.getTokenFromFallBackURL(options, fallBackUrl || this.deviceRegistryV1APIPath);
+            } else {
+                await this.getTokenFromFallBackURL(options);
+            }
+            return Promise.resolve(this.apiKey); 
         }
     }
 }
